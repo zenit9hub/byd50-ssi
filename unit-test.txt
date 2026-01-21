@@ -1,0 +1,70 @@
+go test -v ./test/
+=== RUN   TestInitDKMS
+--- PASS: TestInitDKMS (0.34s)
+=== RUN   TestKeyExport
+    unit_test.go:49: PbKeyPEM=[-----BEGIN ECDSA PUBLIC KEY-----
+        MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEztPpyFhaTFE9iZN9jef5oJCD49nr
+        wSIoG3gXJYpdp1jlSYX0OnlLQKGh//jNDLQbuvyiY0DhEVM5KgoptWK3NA==
+        -----END ECDSA PUBLIC KEY-----
+        ]
+--- PASS: TestKeyExport (0.00s)
+=== RUN   TestCreateAndResolveDID
+2021/12/07 15:03:03 Created DID: dids:byd50:5b84be529ef13f4cd2544a537a6899beb98978ab
+2021/12/07 15:03:03 ResolveDID(dids:byd50:5b84be529ef13f4cd2544a537a6899beb98978ab)
+    unit_test.go:79: Driver test -- [eth] (did:eth:test1234,resolve document) meta: resErr:
+--- PASS: TestCreateAndResolveDID (0.10s)
+=== RUN   TestGetPublicKey
+2021/12/07 15:03:03 Created DID: dids:byd50:27ddb339596294722c83b4033f0e731d0a5bcbf4
+2021/12/07 15:03:03 ResolveDID(dids:byd50:27ddb339596294722c83b4033f0e731d0a5bcbf4)
+--- PASS: TestGetPublicKey (0.00s)
+=== RUN   TestEncryptDecrypt
+2021/12/07 15:03:03   -- plainText: TestEncryptDecrypt
+2021/12/07 15:03:03   -- cipherText(256)
+2021/12/07 15:03:03   == cipherTextBase64(344)
+--- PASS: TestEncryptDecrypt (0.00s)
+=== RUN   TestSignVerify
+--- PASS: TestSignVerify (0.00s)
+=== RUN   TestVerifyAuthChallengeAndResponse
+2021/12/07 15:03:03 Created DID: dids:byd50:3885f8c933b3861a85173a4ab8176567443e8b40
+2021/12/07 15:03:03 ResolveDID(dids:byd50:3885f8c933b3861a85173a4ab8176567443e8b40)
+2021/12/07 15:03:03   -- plainText: TestVerifyAuthChallengeAndResponse
+2021/12/07 15:03:03   -- cipherText(256)
+2021/12/07 15:03:03   == cipherTextBase64(344)
+2021/12/07 15:03:03   -- plainText: TestVerifyAuthChallengeAndResponse
+2021/12/07 15:03:03   == authChallengeString(344)
+--- PASS: TestVerifyAuthChallengeAndResponse (0.00s)
+=== RUN   TestVerifySimplePresent
+2021/12/07 15:03:03 Created DID: dids:byd50:3a7519500ee859e4bc0c19b4fa97d54a6a9ab9c7
+2021/12/07 15:03:03 didAndTime= dids:byd50:3a7519500ee859e4bc0c19b4fa97d54a6a9ab9c7;2021-12-07T06:03:03Z
+2021/12/07 15:03:03 presentTime: 2021-12-07 06:03:03 +0000 UTC
+2021/12/07 15:03:03 duration = 108.8024ms
+2021/12/07 15:03:03 ResolveDID(dids:byd50:3a7519500ee859e4bc0c19b4fa97d54a6a9ab9c7)
+--- PASS: TestVerifySimplePresent (0.00s)
+=== RUN   TestMakeVcAndVerify
+2021/12/07 15:03:03 Created DID: dids:byd50:64d91e669632897c69e8b1eb4517b0183156abc8
+    unit_test.go:210:  -- vc sample jwt --
+        eyJhbGciOiJFUzI1NiIsImtpZCI6ImRpZHM6cmVhcDo2NGQ5MWU2Njk2MzI4OTdjNjllOGIxZWI0NTE3YjAxODMxNTZhYmM4IiwidHlwIjoiSldUIn0.eyJub25jZSI6IihiS2MpMlhReGMxISIsInZjIjp7IkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIiwiaHR0cHM6Ly93d3cudzMub3JnLzIwMTgvY3JlZGVudGlhbHMvZXhhbXBsZXMvdjEiXSwiY3JlZGVudGlhbFN1YmplY3QiOnsiZGVncmVlIjoiQmFjaGVsb3JEZWdyZWUiLCJuYW1lIjoiXHUwMDNjc3BhbiBsYW5nPSdmci1DQSdcdTAwM2VCYWNjYWxhdXLDqWF0IGVuIG11c2lxdWVzIG51bcOpcmlxdWVzXHUwMDNjL3NwYW5cdTAwM2UifSwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIkFsdW1uaUNyZWRlbnRpYWwiXX0sImV4cCI6MTYzODg1NzI4MywianRpIjoiMDg5YTQxMWYtMGQ4OC00NTBmLThjYzAtMWEzYWNmZWJlY2QzIiwiaWF0IjoxNjM4ODU2OTgzLCJpc3MiOiJodHRwOi8vZ29vZ2xlLmNvbS9pc3N1ZXIiLCJuYmYiOjE2Mzg4NTY5ODN9.zsjQVnG2zyRU-GfvlqlEujiasIp5BBG_vWTW3xCepY3BBo-kV0wpOaIyrlD8ZUIN3HCgeX63oc82V3YyMz7Zow
+        eyJhbGciOiJFUzI1NiIsImtpZCI6ImRpZHM6cmVhcDo2NGQ5MWU2Njk2MzI4OTdjNjllOGIxZWI0NTE3YjAxODMxNTZhYmM4IiwidHlwIjoiSldUIn0.eyJub25jZSI6ImYpVnhUVUxhYWFJNCIsInZjIjp7IkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIiwiaHR0cHM6Ly93d3cudzMub3JnLzIwMTgvY3JlZGVudGlhbHMvZXhhbXBsZXMvdjEiXSwiY3JlZGVudGlhbFN1YmplY3QiOnsiZGVncmVlIjoiQmFjaGVsb3JEZWdyZWUiLCJuYW1lIjoiXHUwMDNjc3BhbiBsYW5nPSdmci1DQSdcdTAwM2VCYWNjYWxhdXLDqWF0IGVuIG11c2lxdWVzIG51bcOpcmlxdWVzXHUwMDNjL3NwYW5cdTAwM2UifSwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIkFsdW1uaUNyZWRlbnRpYWwiXX0sImV4cCI6MTYzODg1NzI4MywianRpIjoiMDg5YTQxMWYtMGQ4OC00NTBmLThjYzAtMWEzYWNmZWJlY2QzIiwiaWF0IjoxNjM4ODU2OTgzLCJpc3MiOiJodHRwOi8vZ29vZ2xlLmNvbS9pc3N1ZXIiLCJuYmYiOjE2Mzg4NTY5ODN9.stYh1d8chlzbnUfC6VaIvQvpbXMiq_bkK_QvE7hcKuWEFY408vulHo97ayQhEgRmXW3u3RqxG8iixtGTO2KLuw
+2021/12/07 15:03:03 ResolveDID(dids:byd50:64d91e669632897c69e8b1eb4517b0183156abc8)
+    unit_test.go:214: token.Valid (true), err (<nil>)
+--- PASS: TestMakeVcAndVerify (0.00s)
+=== RUN   TestMakeVpAndVerify
+2021/12/07 15:03:03 Created DID: dids:byd50:ca87eb3b5dbf7a5fa219373430555732a79e70e1
+    unit_test.go:232:  -- vc sample jwt --
+        eyJhbGciOiJFUzI1NiIsImtpZCI6ImRpZHM6cmVhcDpjYTg3ZWIzYjVkYmY3YTVmYTIxOTM3MzQzMDU1NTczMmE3OWU3MGUxIiwidHlwIjoiSldUIn0.eyJub25jZSI6Im5vbmNlLTE0Mjg1NyIsInZjIjp7IkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIiwiaHR0cHM6Ly93d3cudzMub3JnLzIwMTgvY3JlZGVudGlhbHMvZXhhbXBsZXMvdjEiXSwiY3JlZGVudGlhbFN1YmplY3QiOnsiZGVncmVlIjoiQmFjaGVsb3JEZWdyZWUiLCJuYW1lIjoiXHUwMDNjc3BhbiBsYW5nPSdmci1DQSdcdTAwM2VCYWNjYWxhdXLDqWF0IGVuIG11c2lxdWVzIG51bcOpcmlxdWVzXHUwMDNjL3NwYW5cdTAwM2UifSwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIkFsdW1uaUNyZWRlbnRpYWwiXX0sImV4cCI6MTYzODg1NzI4MywianRpIjoiMDg5YTQxMWYtMGQ4OC00NTBmLThjYzAtMWEzYWNmZWJlY2QzIiwiaWF0IjoxNjM4ODU2OTgzLCJpc3MiOiJodHRwOi8vZ29vZ2xlLmNvbS9pc3N1ZXIiLCJuYmYiOjE2Mzg4NTY5ODN9.ZnsEKogZZJqzLkX3AQX2kJkZaECVCu0bso_ZVOefuJfXfHfCf1YZEWMPnDnrsrJHe9XB4hCl8g6FdOKHZWEYLw
+2021/12/07 15:03:03 ResolveDID(dids:byd50:ca87eb3b5dbf7a5fa219373430555732a79e70e1)
+    unit_test.go:236: token.Valid (true), err (<nil>)
+2021/12/07 15:03:03 Created DID: dids:byd50:3b7c65e121c0a962aadfef0dc6ac20ef5f67ec53
+    unit_test.go:267:  -- vp sample jwt --
+        eyJhbGciOiJFUzI1NiIsImtpZCI6ImRpZHM6cmVhcDozYjdjNjVlMTIxYzBhOTYyYWFkZmVmMGRjNmFjMjBlZjVmNjdlYzUzIiwidHlwIjoiSldUIn0.eyJub25jZSI6IjQrSiMocGpxRmg9SyIsInZwIjp7IkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIiwiaHR0cHM6Ly93d3cudzMub3JnLzIwMTgvY3JlZGVudGlhbHMvZXhhbXBsZXMvdjEiXSwidHlwZSI6WyJWZXJpZmlhYmxlUHJlc2VudGF0aW9uIiwiQ3JlZGVudGlhbE1hbmFnZXJQcmVzZW50YXRpb24iXSwidmVyaWZpYWJsZUNyZWRlbnRpYWwiOlsiZXlKaGJHY2lPaUpGVXpJMU5pSXNJbXRwWkNJNkltUnBaSE02Y21WaGNEcGpZVGczWldJellqVmtZbVkzWVRWbVlUSXhPVE0zTXpRek1EVTFOVGN6TW1FM09XVTNNR1V4SWl3aWRIbHdJam9pU2xkVUluMC5leUp1YjI1alpTSTZJbTV2Ym1ObExURTBNamcxTnlJc0luWmpJanA3SWtCamIyNTBaWGgwSWpwYkltaDBkSEJ6T2k4dmQzZDNMbmN6TG05eVp5OHlNREU0TDJOeVpXUmxiblJwWVd4ekwzWXhJaXdpYUhSMGNITTZMeTkzZDNjdWR6TXViM0puTHpJd01UZ3ZZM0psWkdWdWRHbGhiSE12WlhoaGJYQnNaWE12ZGpFaVhTd2lZM0psWkdWdWRHbGhiRk4xWW1wbFkzUWlPbnNpWkdWbmNtVmxJam9pUW1GamFHVnNiM0pFWldkeVpXVWlMQ0p1WVcxbElqb2lYSFV3TUROamMzQmhiaUJzWVc1blBTZG1jaTFEUVNkY2RUQXdNMlZDWVdOallXeGhkWExEcVdGMElHVnVJRzExYzJseGRXVnpJRzUxYmNPcGNtbHhkV1Z6WEhVd01ETmpMM053WVc1Y2RUQXdNMlVpZlN3aWRIbHdaU0k2V3lKV1pYSnBabWxoWW14bFEzSmxaR1Z1ZEdsaGJDSXNJa0ZzZFcxdWFVTnlaV1JsYm5ScFlXd2lYWDBzSW1WNGNDSTZNVFl6T0RnMU56STRNeXdpYW5ScElqb2lNRGc1WVRReE1XWXRNR1E0T0MwME5UQm1MVGhqWXpBdE1XRXpZV05tWldKbFkyUXpJaXdpYVdGMElqb3hOak00T0RVMk9UZ3pMQ0pwYzNNaU9pSm9kSFJ3T2k4dloyOXZaMnhsTG1OdmJTOXBjM04xWlhJaUxDSnVZbVlpT2pFMk16ZzROVFk1T0ROOS5abnNFS29nWlpKcXpMa1gzQVFYMmtKa1phRUNWQ3UwYnNvX1pWT2VmdUpmWGZIZkNmMVlaRVdNUG5EbnJzckpIZTlYQjRoQ2w4ZzZGZE9LSFpXRVlMdyJdfSwiZXhwIjoxNjM4ODU3MjgzLCJqdGkiOiIwODlhNDExZi0wZDg4LTQ1MGYtOGNjMC0xYTNhY2ZlYmVjZDMiLCJpYXQiOjE2Mzg4NTY5ODMsImlzcyI6Imh0dHA6Ly9nb29nbGUuY29tL2lzc3VlciIsIm5iZiI6MTYzODg1Njk4M30.0kf07ndiW83-FZHBOcA7ajLt0Ha-ZTHkQiBx6MDhCj6V0-RL6cSvqnmXqO5LF51A5TbfxRzbuFVpbvJ3Spn-nA
+2021/12/07 15:03:03 ResolveDID(dids:byd50:3b7c65e121c0a962aadfef0dc6ac20ef5f67ec53)
+2021/12/07 15:03:03 Verify each elements.
+2021/12/07 15:03:03 ResolveDID(dids:byd50:ca87eb3b5dbf7a5fa219373430555732a79e70e1)
+2021/12/07 15:03:03 index[0] proof verified correctly
+    unit_test.go:271: token.Valid (true), err (<nil>)
+2021/12/07 15:03:03 ResolveDID(dids:byd50:3b7c65e121c0a962aadfef0dc6ac20ef5f67ec53)
+    unit_test.go:275: expTime (2021-12-07 15:08:03 +0900 KST), err (<nil>)
+    unit_test.go:285: aud([]), exp(1638857283), iat(1638856983), iss(http://google.com/issuer), nbf(1638856983), vpTyp([VerifiablePresentation CredentialManagerPresentation])
+--- PASS: TestMakeVpAndVerify (0.00s)
+PASS
+ok  	byd50-ssi/test	(cached)

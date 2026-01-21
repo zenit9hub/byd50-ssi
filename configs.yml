@@ -1,0 +1,127 @@
+# system_mode : REL, DEV, LOCAL
+system_mode: "LOCAL"
+system_run_mode: "N/A"
+system_log_flag: "N/A"
+system_log_mode: "N/A"
+system_log_print_mode: "N/A"
+
+# generation_rule : base58, uuid, hexdigit
+generation_rule: "hexdigit"
+
+rel_service:
+  # did registry
+  did_registry:
+    # address
+    address: localhost:50051
+    # port
+    port: :50051
+  # did registrar
+  did_registrar:
+    # address
+    address: localhost:50052
+    # port
+    port: :50052
+    # adopted driver list.
+    adopted_driver_list: ["byd50", "eth", "test"]
+  # service endpoint
+  service_endpoint:
+    # address
+    address: localhost:50053
+    # port
+    port: :50053
+  # relying party
+  relying_party:
+    # address
+    address: localhost:50054
+    # port
+    port: :50054
+  # issuer
+  issuer:
+    # address
+    address: localhost:50055
+    # port
+    port: :50055
+  # eth client
+  eth_client:
+    # raw_url
+    raw_url: https://data-seed-prebsc-1-s1.binance.org:8545
+    # sc_address
+    sc_address: 0xEA40445e1C77071d62D8e25f11bD72314D266BD1
+dev_service:
+  # did registry
+  did_registry:
+    # address
+    address: localhost:50051
+    # port
+    port: :50051
+  # did registrar
+  did_registrar:
+    # address
+    address: localhost:50052
+    # port
+    port: :50052
+    # adopted driver list.
+    adopted_driver_list: ["byd50", "eth", "test"]
+  # service endpoint
+  service_endpoint:
+    # address
+    address: localhost:50053
+    # port
+    port: :50053
+  # relying party
+  relying_party:
+    # address
+    address: localhost:50054
+    # port
+    port: :50054
+  # issuer
+  issuer:
+    # address
+    address: localhost:50055
+    # port
+    port: :50055
+  # eth client
+  eth_client:
+    # raw_url
+    raw_url: https://data-seed-prebsc-1-s1.binance.org:8545
+    # sc_address
+    sc_address: 0xEA40445e1C77071d62D8e25f11bD72314D266BD1
+local_service:
+  # did registry
+  did_registry:
+    # address
+    address: localhost:50051
+    # port
+    port: :50051
+  # did registrar
+  did_registrar:
+    # address
+    address: localhost:50052
+    # port
+    port: :50052
+    # adopted driver list.
+    adopted_driver_list: ["byd50", "eth", "test"]
+  # service endpoint
+  service_endpoint:
+    # address
+    address: localhost:50053
+    # port
+    port: :50053
+  # relying party
+  relying_party:
+    # address
+    address: localhost:50054
+    # port
+    port: :50054
+  # issuer
+  issuer:
+    # address
+    address: localhost:50055
+    # port
+    port: :50055
+  # eth client
+  eth_client:
+    # raw_url
+    raw_url: https://data-seed-prebsc-1-s1.binance.org:8545
+    # sc_address
+    sc_address: 0xEA40445e1C77071d62D8e25f11bD72314D266BD1

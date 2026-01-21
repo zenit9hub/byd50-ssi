@@ -1,0 +1,112 @@
+basePath: /v2
+definitions:
+  api.CreateDidRequestBody:
+    properties:
+      method:
+        type: string
+      publicKeyBase58:
+        type: string
+    type: object
+  web.APIError:
+    properties:
+      createdAt:
+        type: string
+      errorCode:
+        type: integer
+      errorMessage:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server for DID ServiceEndpoint.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: DID Phase 2 Test API
+  version: "1.0"
+paths:
+  /testapi/create-did/:
+    post:
+      consumes:
+      - application/json
+      description: create DID
+      parameters:
+      - description: Some ID
+        in: body
+        name: CreateDidRequestBody
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateDidRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: We need Method and PublicKey!!
+          schema:
+            $ref: '#/definitions/web.APIError'
+        "404":
+          description: Can not find ID
+          schema:
+            $ref: '#/definitions/web.APIError'
+  /testapi/get-did-public-key/{some_id}:
+    get:
+      consumes:
+      - application/json
+      description: get DID's public key
+      parameters:
+      - description: DID
+        in: path
+        name: some_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: We need ID!!
+          schema:
+            $ref: '#/definitions/web.APIError'
+        "404":
+          description: Can not find ID
+          schema:
+            $ref: '#/definitions/web.APIError'
+  /testapi/get-did/{some_id}:
+    get:
+      consumes:
+      - application/json
+      description: get DID's Document
+      parameters:
+      - description: DID
+        in: path
+        name: some_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: We need ID!!
+          schema:
+            $ref: '#/definitions/web.APIError'
+        "404":
+          description: Can not find ID
+          schema:
+            $ref: '#/definitions/web.APIError'
+swagger: "2.0"
