@@ -33,12 +33,15 @@ coverage:
 unit-test:
 	@./scripts/coverage-did.sh
 
-.PHONY: integration-test dev-down
+.PHONY: integration-test dev-down dev-status
 integration-test:
 	@./scripts/integration-test.sh
 
 dev-down:
 	@./scripts/dev-down.sh
+
+dev-status:
+	@./scripts/dev-status.sh
 
 .PHONY: coverage-did swagger swagger-lint swagger-docs swagger-pdf
 coverage-did:

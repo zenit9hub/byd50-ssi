@@ -25,6 +25,19 @@ require_env() {
 # eth driver needs this when using the eth method.
 require_env "ETH_PRIVATE_KEY_HEX"
 
+check_port() {
+  local port="$1"
+  if command -v lsof >/dev/null 2>&1; then
+    if lsof -iTCP:"${port}" -sTCP:LISTEN >/dev/null 2>&1; then
+      echo "[dev-up] warning: port ${port} already in use" >&2
+    fi
+  fi
+}
+
+for port in 50051 50052 50053 50054 50055; do
+  check_port "${port}"
+done
+
 stop_if_running() {
   local pid_file="$1"
   if [[ -f "${pid_file}" ]]; then
