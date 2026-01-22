@@ -44,10 +44,10 @@ func TestGetConfigModes(t *testing.T) {
 system_mode: "%s"
 generation_rule: "hexdigit"
 rel_service:
-  did_registry:
+  did-registry:
     address: "rel:50051"
     port: ":50051"
-  did_registrar:
+  did-sep:
     address: "rel:50052"
     port: ":50052"
     adopted_driver_list: ["byd50"]
@@ -64,10 +64,10 @@ rel_service:
     raw_url: "http://rel"
     sc_address: "0x1"
 dev_service:
-  did_registry:
+  did-registry:
     address: "dev:50051"
     port: ":50051"
-  did_registrar:
+  did-sep:
     address: "dev:50052"
     port: ":50052"
     adopted_driver_list: ["byd50"]
@@ -84,10 +84,10 @@ dev_service:
     raw_url: "http://dev"
     sc_address: "0x2"
 local_service:
-  did_registry:
+  did-registry:
     address: "local:50051"
     port: ":50051"
-  did_registrar:
+  did-sep:
     address: "local:50052"
     port: ":50052"
     adopted_driver_list: ["byd50"]

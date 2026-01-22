@@ -275,6 +275,48 @@ func TestJwtSigningMethodErrors(t *testing.T) {
 	}
 }
 
+func TestJwtMissingKidAndBadKey(t *testing.T) {
+	pvKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	getEmptyKey := func(_ string, _ string) string {
+		return ""
+	}
+
+	noKidToken := jwt.NewWithClaims(jwt.SigningMethodES256, jwt.StandardClaims{Issuer: "did:byd50:test"})
+	noKidJwt, err := noKidToken.SignedString(pvKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ok, err := VerifyVc(noKidJwt, getEmptyKey); ok || err == nil {
+		t.Fatal("expected missing kid error for vc")
+	}
+	if ok, _, err := VerifyVp(noKidJwt, getEmptyKey); ok || err == nil {
+		t.Fatal("expected missing kid error for vp")
+	}
+	if ok, claims, err := ParseVp(noKidJwt, getEmptyKey); ok || err == nil || claims != nil {
+		t.Fatal("expected missing kid error for parse vp")
+	}
+
+	kidToken := jwt.NewWithClaims(jwt.SigningMethodES256, jwt.StandardClaims{Issuer: "did:byd50:test"})
+	kidToken.Header["kid"] = "did:byd50:test"
+	kidJwt, err := kidToken.SignedString(pvKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ok, err := VerifyVc(kidJwt, getEmptyKey); ok || err == nil {
+		t.Fatal("expected bad public key error for vc")
+	}
+	if ok, _, err := VerifyVp(kidJwt, getEmptyKey); ok || err == nil {
+		t.Fatal("expected bad public key error for vp")
+	}
+	if ok, claims, err := ParseVp(kidJwt, getEmptyKey); ok || err == nil || claims != nil {
+		t.Fatal("expected bad public key error for parse vp")
+	}
+}
+
 func TestInternalClaimHelpers(t *testing.T) {
 	claims := MapClaims{
 		"str":       "one",

@@ -5,8 +5,6 @@ import (
 	"byd50-ssi/did/core"
 	byd50_jwt "byd50-ssi/did/core/byd50-jwt"
 	"byd50-ssi/did/core/dids"
-	"crypto/ecdsa"
-	"crypto/rsa"
 	"encoding/pem"
 	"errors"
 	"github.com/golang-jwt/jwt"
@@ -47,7 +45,15 @@ func TestDKMS(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	core.InitDKMSwithKeyPair(dkmsEcdsa.PvKey(), dkmsEcdsa.PbKey())
+	pvKeyEcdsa, err := dkmsEcdsa.PvKeyECDSA()
+	if err != nil {
+		t.Fatal(err)
+	}
+	pbKeyEcdsa, err := dkmsEcdsa.PbKeyECDSA()
+	if err != nil {
+		t.Fatal(err)
+	}
+	core.InitDKMSwithKeyPair(pvKeyEcdsa, pbKeyEcdsa)
 	core.InitDKMSwithKeyPair(nil, nil)
 	core.InitDKMS("")
 
@@ -58,25 +64,41 @@ func TestDKMS(t *testing.T) {
 
 	log.Printf("%v", dkmsEcdsa)
 
-	dkms.SetPvKey(dkms.PvKey().(*rsa.PrivateKey))
+	pvKeyRsa, err := dkms.PvKeyRSA()
+	if err != nil {
+		t.Fatal(err)
+	}
+	pbKeyRsa, err := dkms.PbKeyRSA()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	dkms.SetPvKey(pvKeyRsa)
 	dkms.SetPvKeyPEM(dkms.PvKeyPEM())
 	dkms.SetPvKeyBase58(dkms.PvKeyBase58())
-	dkms.SetPbKey(dkms.PbKey().(*rsa.PublicKey))
+	dkms.SetPbKey(pbKeyRsa)
 	dkms.SetPbKeyPEM(dkms.PbKeyPEM())
 	dkms.SetPbKeyBase58(dkms.PbKeyBase58())
 	dkms.SetDid(dkms.Did())
 
-	core.InitDKMSwithKeyPair(dkms.PvKey(), dkms.PbKey())
+	core.InitDKMSwithKeyPair(pvKeyRsa, pbKeyRsa)
 
-	err = dkms.PvKey().(*rsa.PrivateKey).Validate()
+	err = pvKeyRsa.Validate()
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 }
 
 func TestKeyExport(t *testing.T) {
-	myDkms := core.GetDKMS()
-	pvKeyPem := core.ExportPrivateKeyAsPEM(myDkms.PvKey())
+	myDkms, err := core.InitDKMS(core.KeyTypeRSA)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pvKey, err := myDkms.PvKeyRSA()
+	if err != nil {
+		t.Fatal(err)
+	}
+	pvKeyPem := core.ExportPrivateKeyAsPEM(pvKey)
 	if pvKeyPem != myDkms.PvKeyPEM() {
 		t.Fatal(errors.New("export result error"))
 	}
@@ -99,6 +121,12 @@ func TestEncryptDecrypt(t *testing.T) {
 	if plainText != decryptedText {
 		t.Fatal(errors.New("plainText and decryptedText are not same"))
 	}
+
+	encryptedText = myDkms.Encrypt(plainText)
+	decryptedText = myDkms.Decrypt(encryptedText)
+	if plainText != decryptedText {
+		t.Fatal(errors.New("dkms encrypt/decrypt mismatch"))
+	}
 }
 
 func TestSignVerify(t *testing.T) {
@@ -111,6 +139,14 @@ func TestSignVerify(t *testing.T) {
 	ret = core.PbKeyVerify(myDkms.PbKeyBase58(), plainText, result)
 	if !ret {
 		t.Fatal(errors.New("PbKeyVerify error"))
+	}
+
+	ret, result = myDkms.Sign(plainText)
+	if !ret {
+		t.Fatal("dkms sign failed")
+	}
+	if !myDkms.Verify(plainText, result) {
+		t.Fatal(errors.New("dkms verify error"))
 	}
 }
 
@@ -142,7 +178,10 @@ func TestVC(t *testing.T) {
 	issuerDid, _ := dids.CreateDID(method, pbKey)
 
 	issuerDkmsEcdsa.SetDid(issuerDid)
-	pvKey := issuerDkmsEcdsa.PvKey().(*ecdsa.PrivateKey)
+	pvKey, err := issuerDkmsEcdsa.PvKeyECDSA()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// ******************** Build VC Claims ******************** //
 	nonce := core.RandomString(12)
@@ -201,7 +240,10 @@ func TestVP(t *testing.T) {
 	pbKey := issuerDkmsEcdsa.PbKeyBase58()
 	issuerDid, _ := dids.CreateDID(method, pbKey)
 	issuerDkmsEcdsa.SetDid(issuerDid)
-	issuerPvKey := issuerDkmsEcdsa.PvKey().(*ecdsa.PrivateKey)
+	issuerPvKey, err := issuerDkmsEcdsa.PvKeyECDSA()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// ******************** Create VC ******************** //
 	kid := issuerDid
@@ -218,7 +260,10 @@ func TestVP(t *testing.T) {
 
 	holderDid, _ := dids.CreateDID(method, holderDkmsEcdsa.PbKeyBase58())
 	holderDkmsEcdsa.SetDid(holderDid)
-	holderPvKey := holderDkmsEcdsa.PvKey().(*ecdsa.PrivateKey)
+	holderPvKey, err := holderDkmsEcdsa.PvKeyECDSA()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// ******************** Build VP Claims ******************** //
 	typ := "CredentialManagerPresentation"
@@ -271,16 +316,24 @@ func TestDKMSExportsECDSA(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if core.ExportPrivateKeyAsPEM(dkms.PvKey()) == "" {
+	pvKey, err := dkms.PvKeyECDSA()
+	if err != nil {
+		t.Fatal(err)
+	}
+	pbKey, err := dkms.PbKeyECDSA()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if core.ExportPrivateKeyAsPEM(pvKey) == "" {
 		t.Fatal(errors.New("ecdsa private key pem empty"))
 	}
-	if core.ExportPublicKeyAsPEM(dkms.PbKey()) == "" {
+	if core.ExportPublicKeyAsPEM(pbKey) == "" {
 		t.Fatal(errors.New("ecdsa public key pem empty"))
 	}
-	if core.ExportPrivateKeyAsBase58(dkms.PvKey()) == "" {
+	if core.ExportPrivateKeyAsBase58(pvKey) == "" {
 		t.Fatal(errors.New("ecdsa private key base58 empty"))
 	}
-	if core.ExportPublicKeyAsBase58(dkms.PbKey()) == "" {
+	if core.ExportPublicKeyAsBase58(pbKey) == "" {
 		t.Fatal(errors.New("ecdsa public key base58 empty"))
 	}
 

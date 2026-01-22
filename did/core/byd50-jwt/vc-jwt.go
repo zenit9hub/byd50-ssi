@@ -3,6 +3,7 @@ package byd50_jwt
 import (
 	"crypto/ecdsa"
 	"crypto/x509"
+	"errors"
 	"fmt"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/golang-jwt/jwt"
@@ -94,9 +95,19 @@ func VerifyVc(vcJwt string, getPbKey func(string, string) string) (bool, error) 
 		if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		did := token.Header["kid"].(string)
+		did, ok := token.Header["kid"].(string)
+		if !ok || did == "" {
+			return nil, errors.New("missing kid header")
+		}
 		pbKeyBase58 := getPbKey(did, "")
-		pbKey, _ := x509.ParsePKIXPublicKey(base58.Decode(pbKeyBase58))
+		pbKeyBytes := base58.Decode(pbKeyBase58)
+		if len(pbKeyBytes) == 0 {
+			return nil, errors.New("invalid public key base58")
+		}
+		pbKey, err := x509.ParsePKIXPublicKey(pbKeyBytes)
+		if err != nil {
+			return nil, err
+		}
 		return pbKey, nil
 	})
 	return parseToken.Valid, err

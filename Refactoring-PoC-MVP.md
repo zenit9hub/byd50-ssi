@@ -6,8 +6,8 @@
 - 인터페이스 추상화: Registry 스토리지 인터페이스(put/get/update)와 DID Driver 인터페이스에 컨텍스트·옵션을 추가해 테스트/교체 용이성 확보.
 
 ## 2) 보안/키 관리
-- 하드코딩 키 제거: `eth.go`의 ECDSA 키 상수, PoC용 랜덤 키 생성 흐름을 Secret Manager/KMS나 keystore 파일 기반으로 교체.
-- 챌린지 관리 개선: `greeter_server`의 전역 `sourceData` → 요청별 nonce 저장소(메모리 캐시+TTL)로 변경, 재사용/리플레이 방지.
+- 하드코딩 키 제거: `eth.go`의 ECDSA 키 상수, PoC용 랜덤 키 생성 흐름을 내부 KMS/keystore 파일 기반으로 교체.
+- 챌린지 관리 개선: `demo-rp`의 전역 `sourceData` → 요청별 nonce 저장소(메모리 캐시+TTL)로 변경, 재사용/리플레이 방지.
 - 서명 알고리즘 검증: VC/VP 생성 시 kid·alg 일관성 확인, 지원 키 타입(ECDSA/RSA/Ed25519) 명시 및 거부 정책 추가.
 
 ## 3) 데이터/스토리지
@@ -41,6 +41,27 @@
 3. VC/VP 표준화: 스키마·검증 정책 명문화, 테스트 케이스 확충.
 4. 관측성/운영: health/metrics/tracing, 로깅 개선, CI 파이프라인 도입.
 5. 확장성: HTTP 게이트웨이 정비, SDK/예제 제공, 드라이버 플러그인 구조 고도화.
+
+## 9) 지금 단계 우선순위(3,4 실행 계획)
+### 3) 서비스 실행 단일 진입점 정리
+- `make dev-up` 표준화: 실행 순서/의존성(Registry→Registrar→Issuer→RP→Client) 고정.
+- `.env` 기반 환경변수 표준화: 최소 필수 키만 유지하고 누락 시 명확한 에러 제공.
+- 로그/상태 가시성: `.devlogs`에 서비스별 로그 분리, 실패 시 위치 안내.
+
+### 4) 리팩토링 우선순위 선정
+1. `did/pkg/controller`의 외부 의존 최소화: gRPC 클라이언트 주입 경계 유지 및 에러 처리 개선.
+2. `did/core`의 DID/VC/VP 생성·검증 경로 정리: 입력 검증/에러 일관화.
+3. 키 유틸과 DKMS 계층 분리: RSA/ECDSA 키 변환·서명 로직 단위화.
+4. Registry 스토리지 인터페이스 분리: 현재 LevelDB 의존을 인터페이스로 분리해 교체 가능하게 준비.
+
+### DKMS/키 유틸 구조 분리 초안
+- 목표 패키지 경계:
+  - `did/core/dkms`: 내부 KMS 도메인(키 보관/생성/표현, 서비스 내부 사용).
+  - `did/pkg/keys`: RSA/ECDSA 변환/서명/암복호화 유틸(순수 함수 중심).
+- 단계적 이동 계획:
+  1) 유틸 함수 그룹핑(Export/Parse/Encrypt/Sign) → `did/pkg/keys`로 이동.
+  2) `dkms`는 `keys`만 의존하도록 정리, 외부에서 키 형식 직접 접근 최소화.
+  3) controller/greeter는 `dkms`를 통해서만 키 사용(직접 유틸 호출 금지).
 
 ## MVP 고도화 체크리스트 (진행 기준)
 - [ ] 키/보안: 하드코딩 키 제거 및 `.env`/키스토어 기반 설정 완료.

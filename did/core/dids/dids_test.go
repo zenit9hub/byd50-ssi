@@ -21,6 +21,12 @@ func TestCreateDIDRules(t *testing.T) {
 			t.Fatalf("unexpected did prefix: %s", did)
 		}
 	}
+
+	configs.UseConfig.GenerationRule = "invalid"
+	did, doc := CreateDID("byd50", "publicKeyBase58")
+	if did != "" || len(doc) != 0 {
+		t.Fatal("expected empty did/doc for invalid rule")
+	}
 }
 
 func TestUpdateDocumentError(t *testing.T) {

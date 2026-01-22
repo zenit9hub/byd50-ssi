@@ -134,7 +134,8 @@ func generateDID(pbKey, method, rule string) string {
 
 		didMethodSpecificIdentifier = hexDigitStr
 	default:
-		log.Fatalf("generate rule error - %v", rule)
+		log.Printf("generate rule error - %v", rule)
+		return ""
 	}
 
 	did := "did:" + method + ":" + didMethodSpecificIdentifier

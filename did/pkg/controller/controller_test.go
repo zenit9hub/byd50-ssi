@@ -53,17 +53,26 @@ func TestControllerFlow(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	did := CreateDID(dkms.PbKeyBase58(), "byd50")
+	did, err := CreateDIDWithErr(dkms.PbKeyBase58(), "byd50")
+	if err != nil {
+		t.Fatal(err)
+	}
 	if did == "" {
 		t.Fatal(errors.New("did is empty"))
 	}
 
-	doc := ResolveDID(did)
+	doc, err := ResolveDIDWithErr(did)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if doc == "" {
 		t.Fatal(errors.New("did document is empty"))
 	}
 
-	pbKey := GetPublicKey(did, "")
+	pbKey, err := GetPublicKeyWithErr(did, "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	if pbKey != dkms.PbKeyBase58() {
 		t.Fatal(errors.New("public key mismatch"))
 	}
@@ -107,5 +116,26 @@ func TestGetPublicKeyEmpty(t *testing.T) {
 
 	if pbKey := GetPublicKey(did, ""); pbKey != "" {
 		t.Fatalf("expected empty public key, got %s", pbKey)
+	}
+	if _, err := GetPublicKeyWithErr(did, ""); err == nil {
+		t.Fatal("expected GetPublicKeyWithErr error")
+	}
+}
+
+func TestControllerErrorPaths(t *testing.T) {
+	oldProvider := registrarClientProvider
+	defer func() { registrarClientProvider = oldProvider }()
+
+	fake := &fakeRegistrarClient{docs: map[string]string{}}
+	registrarClientProvider = func() pb.RegistrarClient { return fake }
+
+	if _, err := CreateDIDWithErr("", "byd50"); err == nil {
+		t.Fatal("expected CreateDIDWithErr error")
+	}
+	if _, err := ResolveDIDWithErr(""); err == nil {
+		t.Fatal("expected ResolveDIDWithErr error")
+	}
+	if _, err := GetPublicKeyWithErr("did:byd50:missing", ""); err == nil {
+		t.Fatal("expected GetPublicKeyWithErr error")
 	}
 }

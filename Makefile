@@ -12,15 +12,15 @@ dep:
 	go mod vendor
 
 build:
-	go build -o ./did_registry ./did_registry/main.go
-	go build -o ./did_registrar ./did_registrar/main.go
-	go build -o ./greeter_server ./greeter_server/main.go
-	go build -o ./greeter_issuer ./greeter_issuer/main.go
-	go build -o ./greeter_client ./greeter_client/main.go
+	go build -o ./did-registry ./did-registry/main.go
+	go build -o ./did-sep ./did-sep/main.go
+	go build -o ./demo-rp ./demo-rp/main.go
+	go build -o ./demo-issuer ./demo-issuer/main.go
+	go build -o ./demo-client ./demo-client/main.go
 
 docker:
-	docker build -t did-registry_$(DATETIME) -f ./did_registry/Dockerfile .
-	docker build -t did-registrar_$(DATETIME) -f ./did_registrar/Dockerfile .
+	docker build -t did-registry_$(DATETIME) -f ./did-registry/Dockerfile .
+	docker build -t did-sep_$(DATETIME) -f ./did-sep/Dockerfile .
 
 proto:
 	protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto-files/*.proto
@@ -148,17 +148,17 @@ aws_ecr:
 
 # Build for AWS ECR Destribution
 docker_build_registry:
-	docker build -t rs-did-registry -f ./did_registry/Dockerfile .
-	docker tag rs-did-registry:latest 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/rs-did-registry:latest
+	docker build -t did-registry -f ./did-registry/Dockerfile .
+	docker tag did-registry:latest 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-registry:latest
 docker_build_registrar:
-	docker build -t rs-did-registrar -f ./did_registrar/Dockerfile .
-	docker tag rs-did-registrar:latest 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/rs-did-registrar:latest
+	docker build -t did-sep -f ./did-sep/Dockerfile .
+	docker tag did-sep:latest 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-sep:latest
 
 # Push to AWS ECR
 docker_push_registry:
-	docker push 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/rs-did-registry:latest
+	docker push 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-registry:latest
 docker_push_registrar:
-	docker push 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/rs-did-registrar:latest
+	docker push 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-sep:latest
 
 .PHONY: dev-up
 dev-up:

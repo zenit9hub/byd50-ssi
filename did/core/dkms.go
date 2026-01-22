@@ -1,7 +1,7 @@
 package core
 
 import (
-	"byd50-ssi/did/utility"
+	"byd50-ssi/did/pkg/keys"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -23,11 +23,28 @@ type DKMS struct {
 	did              string
 }
 
+type Signer interface {
+	Sign(message string) (bool, string)
+}
+
+type Verifier interface {
+	Verify(message, signature string) bool
+}
+
+type Encryptor interface {
+	Encrypt(plainText string) string
+}
+
+type Decryptor interface {
+	Decrypt(ciphertextBase64 string) string
+}
+
 const (
 	KeyTypeRSA   = "rsa"
 	KeyTypeECDSA = "ecdsa"
 )
 
+// Deprecated: use PvKeyRSA or PvKeyECDSA for type-safe access.
 func (p *DKMS) PvKey() interface{} {
 	return p.privateKey
 }
@@ -37,6 +54,7 @@ func (p *DKMS) SetPvKey(pvKey interface{}) error {
 	return nil
 }
 
+// Deprecated: use PbKeyRSA or PbKeyECDSA for type-safe access.
 func (p *DKMS) PbKey() interface{} {
 	return p.publicKey
 }
@@ -44,6 +62,38 @@ func (p *DKMS) PbKey() interface{} {
 func (p *DKMS) SetPbKey(pbKey interface{}) error {
 	p.publicKey = pbKey
 	return nil
+}
+
+func (p *DKMS) PvKeyRSA() (*rsa.PrivateKey, error) {
+	pvKey, ok := p.privateKey.(*rsa.PrivateKey)
+	if !ok || pvKey == nil {
+		return nil, errors.New("private key is not RSA")
+	}
+	return pvKey, nil
+}
+
+func (p *DKMS) PbKeyRSA() (*rsa.PublicKey, error) {
+	pbKey, ok := p.publicKey.(*rsa.PublicKey)
+	if !ok || pbKey == nil {
+		return nil, errors.New("public key is not RSA")
+	}
+	return pbKey, nil
+}
+
+func (p *DKMS) PvKeyECDSA() (*ecdsa.PrivateKey, error) {
+	pvKey, ok := p.privateKey.(*ecdsa.PrivateKey)
+	if !ok || pvKey == nil {
+		return nil, errors.New("private key is not ECDSA")
+	}
+	return pvKey, nil
+}
+
+func (p *DKMS) PbKeyECDSA() (*ecdsa.PublicKey, error) {
+	pbKey, ok := p.publicKey.(*ecdsa.PublicKey)
+	if !ok || pbKey == nil {
+		return nil, errors.New("public key is not ECDSA")
+	}
+	return pbKey, nil
 }
 
 func (p *DKMS) PvKeyBase58() string {
@@ -94,6 +144,22 @@ func (p *DKMS) SetDid(did string) error {
 	return nil
 }
 
+func (p *DKMS) Sign(message string) (bool, string) {
+	return PvKeySign(p.privateKeyBase58, message, "")
+}
+
+func (p *DKMS) Verify(message, signature string) bool {
+	return PbKeyVerify(p.publicKeyBase58, message, signature)
+}
+
+func (p *DKMS) Encrypt(plainText string) string {
+	return PbKeyEncrypt(p.publicKeyBase58, plainText)
+}
+
+func (p *DKMS) Decrypt(ciphertextBase64 string) string {
+	return PvKeyDecrypt(ciphertextBase64, p.privateKeyBase58)
+}
+
 var dkms DKMS
 
 // GenerateKeyPair Generate key pair
@@ -101,7 +167,7 @@ func GenerateKeyPair(keyType string) (interface{}, interface{}) {
 	var privateKey, publicKey interface{}
 	switch keyType {
 	case KeyTypeRSA:
-		privateKey, publicKey = utility.GenerateKeyPair(2048)
+		privateKey, publicKey = keys.GenerateKeyPair(2048)
 	case KeyTypeECDSA:
 		privateKey, _ = ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 		publicKey = &privateKey.(*ecdsa.PrivateKey).PublicKey

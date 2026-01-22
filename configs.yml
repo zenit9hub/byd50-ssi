@@ -10,13 +10,13 @@ generation_rule: "hexdigit"
 
 rel_service:
   # did registry
-  did_registry:
+  did-registry:
     # address
     address: localhost:50051
     # port
     port: :50051
   # did registrar
-  did_registrar:
+  did-sep:
     # address
     address: localhost:50052
     # port
@@ -29,13 +29,13 @@ rel_service:
     address: localhost:50053
     # port
     port: :50053
-  # relying party
+  # demo relying party
   relying_party:
     # address
     address: localhost:50054
     # port
     port: :50054
-  # issuer
+  # demo issuer
   issuer:
     # address
     address: localhost:50055
@@ -49,13 +49,13 @@ rel_service:
     sc_address: 0xEA40445e1C77071d62D8e25f11bD72314D266BD1
 dev_service:
   # did registry
-  did_registry:
+  did-registry:
     # address
     address: localhost:50051
     # port
     port: :50051
   # did registrar
-  did_registrar:
+  did-sep:
     # address
     address: localhost:50052
     # port
@@ -68,13 +68,13 @@ dev_service:
     address: localhost:50053
     # port
     port: :50053
-  # relying party
+  # demo relying party
   relying_party:
     # address
     address: localhost:50054
     # port
     port: :50054
-  # issuer
+  # demo issuer
   issuer:
     # address
     address: localhost:50055
@@ -88,13 +88,13 @@ dev_service:
     sc_address: 0xEA40445e1C77071d62D8e25f11bD72314D266BD1
 local_service:
   # did registry
-  did_registry:
+  did-registry:
     # address
     address: localhost:50051
     # port
     port: :50051
   # did registrar
-  did_registrar:
+  did-sep:
     # address
     address: localhost:50052
     # port
@@ -107,13 +107,13 @@ local_service:
     address: localhost:50053
     # port
     port: :50053
-  # relying party
+  # demo relying party
   relying_party:
     # address
     address: localhost:50054
     # port
     port: :50054
-  # issuer
+  # demo issuer
   issuer:
     # address
     address: localhost:50055

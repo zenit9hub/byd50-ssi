@@ -7,6 +7,7 @@ import (
 	pb "byd50-ssi/proto-files"
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"strings"
 	"time"
@@ -19,7 +20,18 @@ import (
  * @return the Document object
  */
 func CreateDID(pbKeyBase58, method string) string {
+	did, err := CreateDIDWithErr(pbKeyBase58, method)
+	if err != nil {
+		log.Printf("CreateDID error: %v", err)
+		return ""
+	}
+	return did
+}
 
+func CreateDIDWithErr(pbKeyBase58, method string) (string, error) {
+	if pbKeyBase58 == "" {
+		return "", errors.New("public key is empty")
+	}
 	registrarClient := getRegistrarClient()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -27,11 +39,14 @@ func CreateDID(pbKeyBase58, method string) string {
 
 	r, err := registrarClient.CreateDID(ctx, &pb.CreateDIDsRequest{PublicKeyBase58: pbKeyBase58, Method: method})
 	if err != nil {
-		log.Fatalf("could not greet: %v", err)
+		return "", err
+	}
+	if r.GetDid() == "" {
+		return "", errors.New("registrar returned empty did")
 	}
 
 	log.Printf("Created DID: %s", r.GetDid())
-	return r.GetDid()
+	return r.GetDid(), nil
 }
 
 /**
@@ -72,6 +87,18 @@ func revokePublicKey(pbKey, signedJwt string) string {
  * @return the Document object
  */
 func ResolveDID(dID string) string {
+	doc, err := ResolveDIDWithErr(dID)
+	if err != nil {
+		log.Printf("ResolveDID error: %v", err)
+		return ""
+	}
+	return doc
+}
+
+func ResolveDIDWithErr(dID string) (string, error) {
+	if dID == "" {
+		return "", errors.New("did is empty")
+	}
 	// Set up a connection to the server.
 	registrarClient := getRegistrarClient()
 
@@ -80,7 +107,7 @@ func ResolveDID(dID string) string {
 	defer cancel()
 	r, err := registrarClient.ResolveDID(ctx, &pb.ResolveDIDsRequest{Did: dID})
 	if err != nil {
-		log.Fatalf("could not greet: %v", err)
+		return "", err
 	}
 	log.Printf("ResolveDID(%v)", dID)
 
@@ -88,7 +115,10 @@ func ResolveDID(dID string) string {
 	resolveResponse.ResolutionMetadata.ResolutionError = r.GetResolutionError()
 
 	documents := r.GetDidDocument()
-	return documents
+	if documents == "" {
+		return "", errors.New("registrar returned empty document")
+	}
+	return documents, nil
 }
 
 /**
@@ -99,17 +129,34 @@ func ResolveDID(dID string) string {
  * @return the publicKey object
  */
 func GetPublicKey(did, keyId string) string {
+	pbKeyBase58, err := GetPublicKeyWithErr(did, keyId)
+	if err != nil {
+		log.Printf("GetPublicKey error: %v", err)
+		return ""
+	}
+	return pbKeyBase58
+}
+
+func GetPublicKeyWithErr(did, keyId string) (string, error) {
 	// Add PublicKey in to the Document
 	var ifDoc dids.DocumentInterface
-	document := ResolveDID(did)
-	json.Unmarshal([]byte(document), &ifDoc)
+	document, err := ResolveDIDWithErr(did)
+	if err != nil {
+		return "", err
+	}
+	if err := json.Unmarshal([]byte(document), &ifDoc); err != nil {
+		return "", err
+	}
+	if len(ifDoc.Authentication) == 0 {
+		return "", errors.New("no authentication keys in document")
+	}
 	pbKeyBase58 := ifDoc.Authentication[0].PublicKeyBase58
 
 	if len(pbKeyBase58) == 0 {
-		log.Printf("\n\t !!warning!! pbKeyBase58 length is zero!! \n")
+		return "", errors.New("public key is empty")
 	}
 
-	return pbKeyBase58
+	return pbKeyBase58, nil
 }
 
 var registrarClientProvider = rc.GetRegistrarClient
@@ -119,7 +166,11 @@ func getRegistrarClient() pb.RegistrarClient {
 }
 
 func GetAuthChallengeString(did, plainText string) string {
-	pbKeyBase58 := GetPublicKey(did, "")
+	pbKeyBase58, err := GetPublicKeyWithErr(did, "")
+	if err != nil {
+		log.Printf("GetAuthChallengeString error: %v", err)
+		return ""
+	}
 
 	authChallengeString := core.PbKeyEncrypt(pbKeyBase58, plainText)
 	log.Printf("  -- plainText: %v", plainText)
@@ -158,7 +209,11 @@ func VerifySimplePresent(simplePresentString string) string {
 	log.Printf("duration = %v", duration)
 
 	if duration < time.Second*10 {
-		pbKeyBase58 := GetPublicKey(aDid, "")
+		pbKeyBase58, err := GetPublicKeyWithErr(aDid, "")
+		if err != nil {
+			log.Printf("VerifySimplePresent error: %v", err)
+			return result
+		}
 		if core.PbKeyVerify(pbKeyBase58, aDid+";"+aTime, aSign) {
 			result = "success"
 		}
