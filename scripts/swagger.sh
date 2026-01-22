@@ -9,4 +9,4 @@ if ! command -v swag >/dev/null 2>&1; then
   exit 1
 fi
 
-swag init -g did_service_endpoint/main.go -o did_service_endpoint/docs
+swag init -g apps/did_service_endpoint/main.go -o apps/did_service_endpoint/docs

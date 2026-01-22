@@ -9,4 +9,4 @@ if ! command -v npx >/dev/null 2>&1; then
   exit 1
 fi
 
-npx @redocly/cli lint did_service_endpoint/docs/swagger.json
+npx @redocly/cli lint apps/did_service_endpoint/docs/swagger.json

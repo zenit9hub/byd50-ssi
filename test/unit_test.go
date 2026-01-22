@@ -4,9 +4,9 @@
 package main_test
 
 import (
-	"byd50-ssi/did/core"
-	"byd50-ssi/did/core/byd50-jwt"
-	"byd50-ssi/did/pkg/controller"
+	"byd50-ssi/pkg/did/core"
+	"byd50-ssi/pkg/did/core/byd50-jwt"
+	"byd50-ssi/pkg/did/pkg/controller"
 	"crypto/ecdsa"
 	"crypto/rsa"
 	"encoding/pem"
@@ -22,7 +22,11 @@ func TestInitDKMS(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	err = dkms.PvKey().(*rsa.PrivateKey).Validate()
+	pvKey, err := dkms.PvKeyRSA()
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = pvKey.Validate()
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -31,8 +35,8 @@ func TestInitDKMS(t *testing.T) {
 func TestEncryptDecrypt(t *testing.T) {
 	myDkms := core.GetDKMS()
 	plainText := "TestEncryptDecrypt"
-	encryptedText := core.PbKeyEncrypt(myDkms.PbKeyBase58(), plainText)
-	decryptedText := core.PvKeyDecrypt(encryptedText, myDkms.PvKeyBase58())
+	encryptedText := myDkms.Encrypt(plainText)
+	decryptedText := myDkms.Decrypt(encryptedText)
 	if plainText != decryptedText {
 		t.Fatal(errors.New("plainText and decryptedText are not same"))
 	}

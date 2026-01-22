@@ -12,21 +12,21 @@ dep:
 	go mod vendor
 
 build:
-	go build -o ./did-registry ./did-registry/main.go
-	go build -o ./did-sep ./did-sep/main.go
-	go build -o ./demo-rp ./demo-rp/main.go
-	go build -o ./demo-issuer ./demo-issuer/main.go
-	go build -o ./demo-client ./demo-client/main.go
+	go build -o ./apps/did-registry ./apps/did-registry/main.go
+	go build -o ./apps/did-sep ./apps/did-sep/main.go
+	go build -o ./apps/demo-rp ./apps/demo-rp/main.go
+	go build -o ./apps/demo-issuer ./apps/demo-issuer/main.go
+	go build -o ./apps/demo-client ./apps/demo-client/main.go
 
 docker:
-	docker build -t did-registry_$(DATETIME) -f ./did-registry/Dockerfile .
-	docker build -t did-sep_$(DATETIME) -f ./did-sep/Dockerfile .
+	docker build -t did-registry_$(DATETIME) -f ./apps/did-registry/Dockerfile .
+	docker build -t did-sep_$(DATETIME) -f ./apps/did-sep/Dockerfile .
 
 proto:
 	protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto-files/*.proto
 
 coverage:
-	go test ./did/core/ -coverprofile="coverage.out"
+	go test ./pkg/did/core/ -coverprofile="coverage.out"
 	go tool cover -html="coverage.out" -o coverage.html
 	go tool cover -html="coverage.out"
 
@@ -151,10 +151,10 @@ aws_ecr:
 
 # Build for AWS ECR Destribution
 docker_build_registry:
-	docker build -t did-registry -f ./did-registry/Dockerfile .
+	docker build -t did-registry -f ./apps/did-registry/Dockerfile .
 	docker tag did-registry:latest 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-registry:latest
 docker_build_registrar:
-	docker build -t did-sep -f ./did-sep/Dockerfile .
+	docker build -t did-sep -f ./apps/did-sep/Dockerfile .
 	docker tag did-sep:latest 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-sep:latest
 
 # Push to AWS ECR

@@ -11,7 +11,7 @@ fi
 
 mkdir -p dist
 
-npx @redocly/cli build-docs did_service_endpoint/docs/swagger.json \
+npx @redocly/cli build-docs apps/did_service_endpoint/docs/swagger.json \
   --options.expandResponses="200,400,401,500" \
   --options.requiredPropsFirst=true \
   --options.pathInMiddlePanel \

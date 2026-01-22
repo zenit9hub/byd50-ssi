@@ -4,9 +4,9 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${ROOT_DIR}"
 
-EXCLUDE_REGEX='did/core/driver|did/core/driver/scdid|did/c-shared|did/service|did/core/rc'
+EXCLUDE_REGEX='pkg/did/core/driver|pkg/did/core/driver/scdid|pkg/did/c-shared|pkg/did/service|pkg/did/core/rc'
 
-PKGS=$(go list ./did/... | grep -vE "${EXCLUDE_REGEX}")
+PKGS=$(go list ./pkg/did/... | grep -vE "${EXCLUDE_REGEX}")
 COVERPROFILE="coverage.out"
 
 if [[ -z "${PKGS}" ]]; then

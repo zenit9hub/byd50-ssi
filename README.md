@@ -1,5 +1,11 @@
 # Byd50-SSI
 
+## Layout
+- `apps/`: runnable services/clients
+- `pkg/`: shared libraries
+- `configs/`: service configuration
+- `docs/`: documentation
+
 ## Demo Services (DID-SEP Flow)
 
 Local run entrypoint:
@@ -22,11 +28,11 @@ This starts:
 
 ```bash
 $ aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com
-$ docker build -t did-registry -f ./did-registry/Dockerfile .
+$ docker build -t did-registry -f ./apps/did-registry/Dockerfile .
 $ docker tag did-registry:latest 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-registry:latest
 $ docker push 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-registry:latest
 
-$ docker build -t did-sep -f ./did-sep/Dockerfile .
+$ docker build -t did-sep -f ./apps/did-sep/Dockerfile .
 $ docker tag did-sep:latest 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-sep:latest
 $ docker push 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-sep:latest
 ```

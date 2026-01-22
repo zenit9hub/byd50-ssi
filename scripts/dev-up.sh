@@ -64,15 +64,15 @@ start_service() {
 }
 
 # Start servers
-start_service "did-registry" "go run ./did-registry/main.go"
-start_service "did-sep" "go run ./did-sep/main.go"
-start_service "demo-issuer" "go run ./demo-issuer/main.go"
-start_service "demo-rp" "go run ./demo-rp/main.go"
+start_service "did-registry" "go run ./apps/did-registry/main.go"
+start_service "did-sep" "go run ./apps/did-sep/main.go"
+start_service "demo-issuer" "go run ./apps/demo-issuer/main.go"
+start_service "demo-rp" "go run ./apps/demo-rp/main.go"
 
 # Give servers a moment to bind their ports before the client exercise.
 sleep 2
 
 echo "[dev-up] running demo-client to exercise the flow"
-go run "${ROOT_DIR}/demo-client/main.go" | tee "${LOG_DIR}/demo-client.log"
+go run "${ROOT_DIR}/apps/demo-client/main.go" | tee "${LOG_DIR}/demo-client.log"
 
 echo "[dev-up] all services running; logs under ${LOG_DIR}"
