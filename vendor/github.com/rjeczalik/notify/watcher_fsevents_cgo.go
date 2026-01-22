@@ -20,6 +20,7 @@ static FSEventStreamRef EventStreamCreate(FSEventStreamContext * context, uintpt
 }
 
 #cgo LDFLAGS: -framework CoreServices
+#cgo CFLAGS: -Wno-deprecated-declarations
 */
 import "C"
 
