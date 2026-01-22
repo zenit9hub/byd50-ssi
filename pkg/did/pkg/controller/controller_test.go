@@ -48,7 +48,7 @@ func TestControllerFlow(t *testing.T) {
 	fake := &fakeRegistrarClient{docs: map[string]string{}}
 	registrarClientProvider = func() pb.RegistrarClient { return fake }
 
-	dkms, err := core.InitDKMS(core.KeyTypeRSA)
+	dkms, err := core.InitKMS(core.KeyTypeRSA)
 	if err != nil {
 		t.Fatal(err)
 	}

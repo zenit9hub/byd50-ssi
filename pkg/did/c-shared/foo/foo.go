@@ -13,19 +13,19 @@ import (
 )
 
 func CreateKeyPairForAndr() {
-	_, err := core.InitDKMS(core.KeyTypeECDSA)
+	_, err := core.InitKMS(core.KeyTypeECDSA)
 	if err != nil {
 		panic(err)
 	}
 }
 
 func GetPrivateKeyBase58() string {
-	dkms := core.GetDKMS()
+	dkms := core.GetKMS()
 	return dkms.PvKeyBase58()
 }
 
 func GetPublicKeyBase58() string {
-	dkms := core.GetDKMS()
+	dkms := core.GetKMS()
 	return dkms.PbKeyBase58()
 }
 

@@ -40,8 +40,8 @@ func TestContains(t *testing.T) {
 	}
 }
 
-func TestDKMS(t *testing.T) {
-	dkmsEcdsa, err := core.InitDKMS(core.KeyTypeECDSA)
+func TestKMS(t *testing.T) {
+	dkmsEcdsa, err := core.InitKMS(core.KeyTypeECDSA)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -53,11 +53,11 @@ func TestDKMS(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	core.InitDKMSwithKeyPair(pvKeyEcdsa, pbKeyEcdsa)
-	core.InitDKMSwithKeyPair(nil, nil)
-	core.InitDKMS("")
+	core.InitKMSwithKeyPair(pvKeyEcdsa, pbKeyEcdsa)
+	core.InitKMSwithKeyPair(nil, nil)
+	core.InitKMS("")
 
-	dkms, err := core.InitDKMS(core.KeyTypeRSA)
+	dkms, err := core.InitKMS(core.KeyTypeRSA)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -81,7 +81,7 @@ func TestDKMS(t *testing.T) {
 	dkms.SetPbKeyBase58(dkms.PbKeyBase58())
 	dkms.SetDid(dkms.Did())
 
-	core.InitDKMSwithKeyPair(pvKeyRsa, pbKeyRsa)
+	core.InitKMSwithKeyPair(pvKeyRsa, pbKeyRsa)
 
 	err = pvKeyRsa.Validate()
 	if err != nil {
@@ -90,7 +90,7 @@ func TestDKMS(t *testing.T) {
 }
 
 func TestKeyExport(t *testing.T) {
-	myDkms, err := core.InitDKMS(core.KeyTypeRSA)
+	myDkms, err := core.InitKMS(core.KeyTypeRSA)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,7 +114,7 @@ func TestKeyExport(t *testing.T) {
 }
 
 func TestEncryptDecrypt(t *testing.T) {
-	myDkms := core.GetDKMS()
+	myDkms := core.GetKMS()
 	plainText := "TestEncryptDecrypt"
 	encryptedText := core.PbKeyEncrypt(myDkms.PbKeyBase58(), plainText)
 	decryptedText := core.PvKeyDecrypt(encryptedText, myDkms.PvKeyBase58())
@@ -130,7 +130,7 @@ func TestEncryptDecrypt(t *testing.T) {
 }
 
 func TestSignVerify(t *testing.T) {
-	myDkms := core.GetDKMS()
+	myDkms := core.GetKMS()
 	plainText := "TestEncryptDecrypt"
 	ret, result := core.PvKeySign(myDkms.PvKeyBase58(), plainText, "")
 	if !ret {
@@ -159,7 +159,7 @@ func TestRandomString(t *testing.T) {
 }
 
 //func TestCreateResolveDID(t *testing.T) {
-//	myDkms := core.GetDKMS()
+//	myDkms := core.GetKMS()
 //	createdDid := core.CreateDID(myDkms.PbKeyBase58(), "byd50")
 //	createdDoc := core.ResolveDID(createdDid)
 //	t.Logf("createdDid: %v\n createdDoc: %v\n", createdDid, string(createdDoc))
@@ -167,7 +167,7 @@ func TestRandomString(t *testing.T) {
 
 func TestVC(t *testing.T) {
 	// ******************** KeyTypeECDSA ******************** //
-	issuerDkmsEcdsa, err := core.InitDKMS(core.KeyTypeECDSA)
+	issuerDkmsEcdsa, err := core.InitKMS(core.KeyTypeECDSA)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -231,7 +231,7 @@ func TestVC(t *testing.T) {
 func TestVP(t *testing.T) {
 	// ******************** Sequence 1 preparing for vc ******************** //
 	// ******************** KeyTypeECDSA ******************** //
-	issuerDkmsEcdsa, err := core.InitDKMS(core.KeyTypeECDSA)
+	issuerDkmsEcdsa, err := core.InitKMS(core.KeyTypeECDSA)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -250,7 +250,7 @@ func TestVP(t *testing.T) {
 	vcJwt := byd50_jwt.MakeVcSample(kid, issuerPvKey)
 	t.Logf(" -- vc sample jwt --\n%v", vcJwt)
 
-	holderDkmsEcdsa, err := core.InitDKMS(core.KeyTypeECDSA)
+	holderDkmsEcdsa, err := core.InitKMS(core.KeyTypeECDSA)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -311,8 +311,8 @@ func TestVP(t *testing.T) {
 
 }
 
-func TestDKMSExportsECDSA(t *testing.T) {
-	dkms, err := core.InitDKMS(core.KeyTypeECDSA)
+func TestKMSExportsECDSA(t *testing.T) {
+	dkms, err := core.InitKMS(core.KeyTypeECDSA)
 	if err != nil {
 		t.Fatal(err)
 	}

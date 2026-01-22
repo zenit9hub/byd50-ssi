@@ -97,8 +97,14 @@ func main() {
 	newKeyAddr := crypto.PubkeyToAddress(*newKeyPbKeyECDSA).Hex()
 	fmt.Printf("bytes: %v\n newKeyAddr: %v\n", bytes, newKeyAddr)
 
-	myDKMS, err := core.InitDKMS(core.KeyTypeECDSA)
-	myPvKey := myDKMS.PvKey().(*ecdsa.PrivateKey)
+	myKMS, err := core.InitKMS(core.KeyTypeECDSA)
+	if err != nil {
+		log.Fatalf("Failed to init KMS: %v", err)
+	}
+	myPvKey, err := myKMS.PvKeyECDSA()
+	if err != nil {
+		log.Fatalf("invalid ECDSA private key: %v", err)
+	}
 	fmt.Printf("pvkey: %v\n", myPvKey)
 	myBytes := crypto.FromECDSA(myPvKey)
 	fmt.Printf("myBytes: %v\n", myBytes)
@@ -117,7 +123,7 @@ func main() {
 	auth, err := bind.NewKeyedTransactorWithChainID(importedPvKey, big.NewInt(3333))
 
 	fmt.Printf("auth.From : %v\n", auth.From)
-	createdDid, createdDoc := dids.CreateDID("eth", myDKMS.PbKeyBase58())
+	createdDid, createdDoc := dids.CreateDID("eth", myKMS.PbKeyBase58())
 	fmt.Printf("createdDid: %v\n createdDoc: %v\n", createdDid, string(createdDoc))
 
 	transact, err2 := instance.CreateDid(&bind.TransactOpts{

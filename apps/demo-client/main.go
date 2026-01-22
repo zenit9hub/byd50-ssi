@@ -49,7 +49,7 @@ var (
 	issuerClient pb.IssuerClient
 )
 
-func mustPvKeyECDSA(dkms core.DKMS) *ecdsa.PrivateKey {
+func mustPvKeyECDSA(dkms core.KMS) *ecdsa.PrivateKey {
 	pvKey, err := dkms.PvKeyECDSA()
 	if err != nil {
 		log.Fatalf("invalid ECDSA private key: %v", err)
@@ -89,7 +89,7 @@ func GetIssuerClient(serviceHost string) pb.IssuerClient {
 	return issuerClient
 }
 
-func UseCase1DefaultAuthentication(dkms core.DKMS) {
+func UseCase1DefaultAuthentication(dkms core.KMS) {
 	logger.FuncStart()
 
 	// Set up a connection to the server.
@@ -103,7 +103,7 @@ func UseCase1DefaultAuthentication(dkms core.DKMS) {
 	2. Recv 'Auth Challenge String'
 	3. decrypt AuthChallenge String
 	*/
-	log.Printf("myDKMS.DID = " + dkms.Did())
+	log.Printf("myKMS.DID = " + dkms.Did())
 	challengeReply, err := relyingPartyClient.AuthChallenge(ctx, &pb.ChallengeRequest{Did: dkms.Did()})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
@@ -126,7 +126,7 @@ func UseCase1DefaultAuthentication(dkms core.DKMS) {
 	logger.FuncEnd()
 }
 
-func UseCase2SimpleAuthentication(dkms core.DKMS) {
+func UseCase2SimpleAuthentication(dkms core.KMS) {
 	logger.FuncStart()
 
 	// Set up a connection to the server.
@@ -141,7 +141,7 @@ func UseCase2SimpleAuthentication(dkms core.DKMS) {
 	   signedStr := RsaSign(didAndTime)
 	   challengeString := didAndTime + ";" + signedStr
 	*/
-	log.Printf("myDKMS.DID = " + dkms.Did())
+	log.Printf("myKMS.DID = " + dkms.Did())
 
 	simplePresentString := controller.GetSimplePresent(dkms.Did(), dkms.PvKeyBase58())
 
@@ -153,7 +153,7 @@ func UseCase2SimpleAuthentication(dkms core.DKMS) {
 	logger.FuncEnd()
 }
 
-func UseCase3RequestCredential(dkms core.DKMS) {
+func UseCase3RequestCredential(dkms core.KMS) {
 	logger.FuncStart()
 
 	// Set up a connection to the server.
@@ -170,7 +170,7 @@ func UseCase3RequestCredential(dkms core.DKMS) {
 	1. JWT
 		credentialsubject
 	*/
-	log.Printf("myDKMS.DID = " + dkms.Did())
+	log.Printf("myKMS.DID = " + dkms.Did())
 
 	// ******************** Build VC Claims ******************** //
 	nonce := core.RandomString(12)
@@ -317,28 +317,28 @@ func geth() {
 }
 
 func main() {
-	// Initialize DKMS
-	myDKMS, err := core.InitDKMS(core.KeyTypeRSA)
+	// Initialize KMS
+	myKMS, err := core.InitKMS(core.KeyTypeRSA)
 	if err != nil {
-		log.Fatalf("could not Init DKMS (%v)", err.Error())
+		log.Fatalf("could not Init KMS (%v)", err.Error())
 	}
 
 	// Create DID
 	method := "byd50"
-	did := controller.CreateDID(myDKMS.PbKeyBase58(), method)
-	myDKMS.SetDid(did)
+	did := controller.CreateDID(myKMS.PbKeyBase58(), method)
+	myKMS.SetDid(did)
 
 	// Use Case 1. Default Authentication
-	UseCase1DefaultAuthentication(myDKMS)
+	UseCase1DefaultAuthentication(myKMS)
 
 	// Use Case 2. Simple Authentication
-	UseCase2SimpleAuthentication(myDKMS)
+	UseCase2SimpleAuthentication(myKMS)
 
 	// Use Case 3. Simple Authentication
-	// Initialize DKMS
-	myDKMS, err = core.InitDKMS(core.KeyTypeECDSA)
+	// Initialize KMS
+	myKMS, err = core.InitKMS(core.KeyTypeECDSA)
 	// Create DID
-	did = controller.CreateDID(myDKMS.PbKeyBase58(), method)
-	myDKMS.SetDid(did)
-	UseCase3RequestCredential(myDKMS)
+	did = controller.CreateDID(myKMS.PbKeyBase58(), method)
+	myKMS.SetDid(did)
+	UseCase3RequestCredential(myKMS)
 }

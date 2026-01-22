@@ -3,11 +3,11 @@ package controller
 import (
 	"byd50-ssi/pkg/did/core"
 	"byd50-ssi/pkg/did/core/dids"
+	derrors "byd50-ssi/pkg/did/errors"
 	"byd50-ssi/pkg/did/core/rc"
 	pb "byd50-ssi/proto-files"
 	"context"
 	"encoding/json"
-	"errors"
 	"log"
 	"strings"
 	"time"
@@ -30,7 +30,7 @@ func CreateDID(pbKeyBase58, method string) string {
 
 func CreateDIDWithErr(pbKeyBase58, method string) (string, error) {
 	if pbKeyBase58 == "" {
-		return "", errors.New("public key is empty")
+		return "", derrors.New(derrors.CodeEmptyKey, "public key is empty")
 	}
 	registrarClient := getRegistrarClient()
 
@@ -39,10 +39,10 @@ func CreateDIDWithErr(pbKeyBase58, method string) (string, error) {
 
 	r, err := registrarClient.CreateDID(ctx, &pb.CreateDIDsRequest{PublicKeyBase58: pbKeyBase58, Method: method})
 	if err != nil {
-		return "", err
+		return "", derrors.Wrap(derrors.CodeUpstream, "registrar create did failed", err)
 	}
 	if r.GetDid() == "" {
-		return "", errors.New("registrar returned empty did")
+		return "", derrors.New(derrors.CodeInternal, "registrar returned empty did")
 	}
 
 	log.Printf("Created DID: %s", r.GetDid())
@@ -97,7 +97,7 @@ func ResolveDID(dID string) string {
 
 func ResolveDIDWithErr(dID string) (string, error) {
 	if dID == "" {
-		return "", errors.New("did is empty")
+		return "", derrors.New(derrors.CodeInvalidInput, "did is empty")
 	}
 	// Set up a connection to the server.
 	registrarClient := getRegistrarClient()
@@ -107,7 +107,7 @@ func ResolveDIDWithErr(dID string) (string, error) {
 	defer cancel()
 	r, err := registrarClient.ResolveDID(ctx, &pb.ResolveDIDsRequest{Did: dID})
 	if err != nil {
-		return "", err
+		return "", derrors.Wrap(derrors.CodeUpstream, "registrar resolve did failed", err)
 	}
 	log.Printf("ResolveDID(%v)", dID)
 
@@ -116,7 +116,7 @@ func ResolveDIDWithErr(dID string) (string, error) {
 
 	documents := r.GetDidDocument()
 	if documents == "" {
-		return "", errors.New("registrar returned empty document")
+		return "", derrors.New(derrors.CodeNotFound, "registrar returned empty document")
 	}
 	return documents, nil
 }
@@ -145,15 +145,15 @@ func GetPublicKeyWithErr(did, keyId string) (string, error) {
 		return "", err
 	}
 	if err := json.Unmarshal([]byte(document), &ifDoc); err != nil {
-		return "", err
+		return "", derrors.Wrap(derrors.CodeInternal, "failed to parse did document", err)
 	}
 	if len(ifDoc.Authentication) == 0 {
-		return "", errors.New("no authentication keys in document")
+		return "", derrors.New(derrors.CodeNotFound, "no authentication keys in document")
 	}
 	pbKeyBase58 := ifDoc.Authentication[0].PublicKeyBase58
 
 	if len(pbKeyBase58) == 0 {
-		return "", errors.New("public key is empty")
+		return "", derrors.New(derrors.CodeEmptyKey, "public key is empty")
 	}
 
 	return pbKeyBase58, nil

@@ -53,7 +53,7 @@
 ## Demo 데모 세트
 - 공통: `proto-files/relyingparty.proto`·`issuer.proto` 기반 gRPC. PoC 시나리오용 예제 코드.
 - `demo-client`:  
-  - DKMS 초기화(RSA→ECDSA 순서), `controller.CreateDID`로 DID 발급.  
+  - KMS 초기화(RSA→ECDSA 순서), `controller.CreateDID`로 DID 발급.  
   - Use case 1: Relying party `AuthChallenge` 수신→개인키 복호화 후 `AuthResponse`.  
   - Use case 2: SimplePresent(서명+타임스탬프) 생성/검증.  
   - Use case 3: VC 요청→발급 VC로 VP 구성→Relying party `VerifyVp` 호출.

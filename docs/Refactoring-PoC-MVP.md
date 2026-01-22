@@ -52,13 +52,13 @@
 ### 4) 리팩토링 우선순위 선정
 1. `did/pkg/controller`의 외부 의존 최소화: gRPC 클라이언트 주입 경계 유지 및 에러 처리 개선.
 2. `did/core`의 DID/VC/VP 생성·검증 경로 정리: 입력 검증/에러 일관화.
-3. 키 유틸과 DKMS 계층 분리: RSA/ECDSA 키 변환·서명 로직 단위화.
+3. 키 유틸과 KMS 계층 분리: RSA/ECDSA 키 변환·서명 로직 단위화.
 4. Registry 스토리지 인터페이스 분리: 현재 LevelDB 의존을 인터페이스로 분리해 교체 가능하게 준비.
 
-### DKMS/키 유틸 구조 분리 초안
+### KMS/키 유틸 구조 분리 초안
 - 목표 패키지 경계:
-  - `did/core/dkms`: 내부 KMS 도메인(키 보관/생성/표현, 서비스 내부 사용).
-  - `did/pkg/keys`: RSA/ECDSA 변환/서명/암복호화 유틸(순수 함수 중심).
+  - `pkg/did/core/kms`: 내부 KMS 도메인(키 보관/생성/표현, 서비스 내부 사용).
+  - `pkg/keys`: RSA/ECDSA 변환/서명/암복호화 유틸(순수 함수 중심).
 - 단계적 이동 계획:
   1) 유틸 함수 그룹핑(Export/Parse/Encrypt/Sign) → `did/pkg/keys`로 이동.
   2) `dkms`는 `keys`만 의존하도록 정리, 외부에서 키 형식 직접 접근 최소화.

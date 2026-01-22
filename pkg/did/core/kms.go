@@ -13,7 +13,7 @@ import (
 	"log"
 )
 
-type DKMS struct {
+type KMS struct {
 	privateKey       interface{}
 	publicKey        interface{}
 	privateKeyPem    string
@@ -45,26 +45,26 @@ const (
 )
 
 // Deprecated: use PvKeyRSA or PvKeyECDSA for type-safe access.
-func (p *DKMS) PvKey() interface{} {
+func (p *KMS) PvKey() interface{} {
 	return p.privateKey
 }
 
-func (p *DKMS) SetPvKey(pvKey interface{}) error {
+func (p *KMS) SetPvKey(pvKey interface{}) error {
 	p.privateKey = pvKey
 	return nil
 }
 
 // Deprecated: use PbKeyRSA or PbKeyECDSA for type-safe access.
-func (p *DKMS) PbKey() interface{} {
+func (p *KMS) PbKey() interface{} {
 	return p.publicKey
 }
 
-func (p *DKMS) SetPbKey(pbKey interface{}) error {
+func (p *KMS) SetPbKey(pbKey interface{}) error {
 	p.publicKey = pbKey
 	return nil
 }
 
-func (p *DKMS) PvKeyRSA() (*rsa.PrivateKey, error) {
+func (p *KMS) PvKeyRSA() (*rsa.PrivateKey, error) {
 	pvKey, ok := p.privateKey.(*rsa.PrivateKey)
 	if !ok || pvKey == nil {
 		return nil, errors.New("private key is not RSA")
@@ -72,7 +72,7 @@ func (p *DKMS) PvKeyRSA() (*rsa.PrivateKey, error) {
 	return pvKey, nil
 }
 
-func (p *DKMS) PbKeyRSA() (*rsa.PublicKey, error) {
+func (p *KMS) PbKeyRSA() (*rsa.PublicKey, error) {
 	pbKey, ok := p.publicKey.(*rsa.PublicKey)
 	if !ok || pbKey == nil {
 		return nil, errors.New("public key is not RSA")
@@ -80,7 +80,7 @@ func (p *DKMS) PbKeyRSA() (*rsa.PublicKey, error) {
 	return pbKey, nil
 }
 
-func (p *DKMS) PvKeyECDSA() (*ecdsa.PrivateKey, error) {
+func (p *KMS) PvKeyECDSA() (*ecdsa.PrivateKey, error) {
 	pvKey, ok := p.privateKey.(*ecdsa.PrivateKey)
 	if !ok || pvKey == nil {
 		return nil, errors.New("private key is not ECDSA")
@@ -88,7 +88,7 @@ func (p *DKMS) PvKeyECDSA() (*ecdsa.PrivateKey, error) {
 	return pvKey, nil
 }
 
-func (p *DKMS) PbKeyECDSA() (*ecdsa.PublicKey, error) {
+func (p *KMS) PbKeyECDSA() (*ecdsa.PublicKey, error) {
 	pbKey, ok := p.publicKey.(*ecdsa.PublicKey)
 	if !ok || pbKey == nil {
 		return nil, errors.New("public key is not ECDSA")
@@ -96,47 +96,47 @@ func (p *DKMS) PbKeyECDSA() (*ecdsa.PublicKey, error) {
 	return pbKey, nil
 }
 
-func (p *DKMS) PvKeyBase58() string {
+func (p *KMS) PvKeyBase58() string {
 	return p.privateKeyBase58
 }
 
-func (p *DKMS) SetPvKeyBase58(pvKeyBase58 string) error {
+func (p *KMS) SetPvKeyBase58(pvKeyBase58 string) error {
 	p.privateKeyBase58 = pvKeyBase58
 	return nil
 }
 
-func (p *DKMS) PbKeyBase58() string {
+func (p *KMS) PbKeyBase58() string {
 	return p.publicKeyBase58
 }
 
-func (p *DKMS) SetPbKeyBase58(pbKeyBase58 string) error {
+func (p *KMS) SetPbKeyBase58(pbKeyBase58 string) error {
 	p.publicKeyBase58 = pbKeyBase58
 	return nil
 }
 
-func (p *DKMS) PvKeyPEM() string {
+func (p *KMS) PvKeyPEM() string {
 	return p.privateKeyPem
 }
 
-func (p *DKMS) SetPvKeyPEM(pvKeyPem string) error {
+func (p *KMS) SetPvKeyPEM(pvKeyPem string) error {
 	p.privateKeyPem = pvKeyPem
 	return nil
 }
 
-func (p *DKMS) PbKeyPEM() string {
+func (p *KMS) PbKeyPEM() string {
 	return p.publicKeyPem
 }
 
-func (p *DKMS) SetPbKeyPEM(pbKeyPem string) error {
+func (p *KMS) SetPbKeyPEM(pbKeyPem string) error {
 	p.publicKeyPem = pbKeyPem
 	return nil
 }
 
-func (p *DKMS) Did() string {
+func (p *KMS) Did() string {
 	return p.did
 }
 
-func (p *DKMS) SetDid(did string) error {
+func (p *KMS) SetDid(did string) error {
 	if did == "" {
 		return errors.New("invalid did")
 	}
@@ -144,23 +144,23 @@ func (p *DKMS) SetDid(did string) error {
 	return nil
 }
 
-func (p *DKMS) Sign(message string) (bool, string) {
+func (p *KMS) Sign(message string) (bool, string) {
 	return PvKeySign(p.privateKeyBase58, message, "")
 }
 
-func (p *DKMS) Verify(message, signature string) bool {
+func (p *KMS) Verify(message, signature string) bool {
 	return PbKeyVerify(p.publicKeyBase58, message, signature)
 }
 
-func (p *DKMS) Encrypt(plainText string) string {
+func (p *KMS) Encrypt(plainText string) string {
 	return PbKeyEncrypt(p.publicKeyBase58, plainText)
 }
 
-func (p *DKMS) Decrypt(ciphertextBase64 string) string {
+func (p *KMS) Decrypt(ciphertextBase64 string) string {
 	return PvKeyDecrypt(ciphertextBase64, p.privateKeyBase58)
 }
 
-var dkms DKMS
+var kms KMS
 
 // GenerateKeyPair Generate key pair
 func GenerateKeyPair(keyType string) (interface{}, interface{}) {
@@ -177,54 +177,54 @@ func GenerateKeyPair(keyType string) (interface{}, interface{}) {
 	return privateKey, publicKey
 }
 
-// InitDKMS Generate and assign a key pair.
-func InitDKMS(keyType string) (DKMS, error) {
+// InitKMS Generate and assign a key pair.
+func InitKMS(keyType string) (KMS, error) {
 	switch keyType {
 	case KeyTypeRSA:
 		fallthrough
 	case KeyTypeECDSA:
 		pvKey, pbKey := GenerateKeyPair(keyType)
-		dkms.SetPvKey(pvKey)
-		dkms.SetPbKey(pbKey)
-		dkms.SetPvKeyPEM(ExportPrivateKeyAsPEM(pvKey))
-		dkms.SetPbKeyPEM(ExportPublicKeyAsPEM(pbKey))
-		dkms.SetPvKeyBase58(ExportPrivateKeyAsBase58(pvKey))
-		dkms.SetPbKeyBase58(ExportPublicKeyAsBase58(pbKey))
+		kms.SetPvKey(pvKey)
+		kms.SetPbKey(pbKey)
+		kms.SetPvKeyPEM(ExportPrivateKeyAsPEM(pvKey))
+		kms.SetPbKeyPEM(ExportPublicKeyAsPEM(pbKey))
+		kms.SetPvKeyBase58(ExportPrivateKeyAsBase58(pvKey))
+		kms.SetPbKeyBase58(ExportPublicKeyAsBase58(pbKey))
 	default:
-		return dkms, errors.New("unknown keyType: " + keyType)
+		return kms, errors.New("unknown keyType: " + keyType)
 	}
-	return dkms, nil
+	return kms, nil
 }
 
-func InitDKMSwithKeyPair(vPvKey interface{}, vPbKey interface{}) error {
+func InitKMSwithKeyPair(vPvKey interface{}, vPbKey interface{}) error {
 	switch keyType := vPvKey.(type) {
 	case *rsa.PrivateKey:
-		log.Println(keyType.Validate(), "init DKMS")
+		log.Println(keyType.Validate(), "init KMS")
 		pvKey := vPvKey.(*rsa.PrivateKey)
 		pbKey := vPbKey.(*rsa.PublicKey)
-		dkms.SetPvKey(pvKey)
-		dkms.SetPbKey(pbKey)
-		dkms.SetPvKeyPEM(ExportPrivateKeyAsPEM(pvKey))
-		dkms.SetPbKeyPEM(ExportPublicKeyAsPEM(pbKey))
-		dkms.SetPvKeyBase58(ExportPrivateKeyAsBase58(pvKey))
-		dkms.SetPbKeyBase58(ExportPublicKeyAsBase58(pbKey))
+		kms.SetPvKey(pvKey)
+		kms.SetPbKey(pbKey)
+		kms.SetPvKeyPEM(ExportPrivateKeyAsPEM(pvKey))
+		kms.SetPbKeyPEM(ExportPublicKeyAsPEM(pbKey))
+		kms.SetPvKeyBase58(ExportPrivateKeyAsBase58(pvKey))
+		kms.SetPbKeyBase58(ExportPublicKeyAsBase58(pbKey))
 	case *ecdsa.PrivateKey:
 		pvKey := vPvKey.(*ecdsa.PrivateKey)
 		pbKey := vPbKey.(*ecdsa.PublicKey)
-		dkms.SetPvKey(pvKey)
-		dkms.SetPbKey(pbKey)
-		dkms.SetPvKeyPEM(ExportPrivateKeyAsPEM(pvKey))
-		dkms.SetPbKeyPEM(ExportPublicKeyAsPEM(pbKey))
-		dkms.SetPvKeyBase58(ExportPrivateKeyAsBase58(pvKey))
-		dkms.SetPbKeyBase58(ExportPublicKeyAsBase58(pbKey))
+		kms.SetPvKey(pvKey)
+		kms.SetPbKey(pbKey)
+		kms.SetPvKeyPEM(ExportPrivateKeyAsPEM(pvKey))
+		kms.SetPbKeyPEM(ExportPublicKeyAsPEM(pbKey))
+		kms.SetPvKeyBase58(ExportPrivateKeyAsBase58(pvKey))
+		kms.SetPbKeyBase58(ExportPublicKeyAsBase58(pbKey))
 	default:
 		log.Println(keyType, "unknown keyType:%v", keyType)
 	}
 	return nil
 }
 
-func GetDKMS() DKMS {
-	return dkms
+func GetKMS() KMS {
+	return kms
 }
 
 // ExportPrivateKeyAsPEM : Exports a PrivateKey as PEM.

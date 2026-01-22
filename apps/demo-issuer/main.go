@@ -39,14 +39,14 @@ import (
 
 var sourceData = "randomStr;2021-06-08T14:04:43UTC"
 var issuerDid string
-var myDkms core.DKMS
+var myDkms core.KMS
 
 // server is used to implement proto-files.GreeterServer.
 type server struct {
 	pb.UnimplementedIssuerServer
 }
 
-func mustPvKeyECDSA(dkms core.DKMS) *ecdsa.PrivateKey {
+func mustPvKeyECDSA(dkms core.KMS) *ecdsa.PrivateKey {
 	pvKey, err := dkms.PvKeyECDSA()
 	if err != nil {
 		log.Fatalf("invalid ECDSA private key: %v", err)
@@ -304,11 +304,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	// Initialize DKMS
-	myDkms, err = core.InitDKMS(core.KeyTypeECDSA)
+	// Initialize KMS
+	myDkms, err = core.InitKMS(core.KeyTypeECDSA)
 	log.Printf("pvkey : %v", mustPvKeyECDSA(myDkms))
 	if err != nil {
-		log.Fatalf("could not Init DKMS (%v)", err.Error())
+		log.Fatalf("could not Init KMS (%v)", err.Error())
 	}
 
 	// Create DID
