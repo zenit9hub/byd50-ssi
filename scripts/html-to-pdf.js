@@ -1,12 +1,12 @@
 const fs = require("fs");
 const path = require("path");
 
-const distDir = path.join(__dirname, "..", "dist");
+const distDir = path.join(__dirname, "..", "api-docs");
 const htmlPath = path.join(distDir, "api-docs.html");
 const pdfPath = path.join(distDir, "api-docs.pdf");
 
 if (!fs.existsSync(htmlPath)) {
-  console.error("[html-to-pdf] missing dist/api-docs.html");
+  console.error("[html-to-pdf] missing api-docs/api-docs.html");
   process.exit(1);
 }
 

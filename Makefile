@@ -59,6 +59,9 @@ swagger-docs:
 swagger-pdf:
 	@./scripts/swagger-pdf.sh
 
+.PHONY: swagger-all
+swagger-all: swagger swagger-lint swagger-docs swagger-pdf
+
 test2jenkins:
 	go test -v ./did/core/ -tags="unit integration" -covermode=atomic -coverprofile=coverage.out ./cmd/... ./common/... 2>&1 | go-junit-report -set-exit-code > report.xml
 	go tool cover -func coverage.out

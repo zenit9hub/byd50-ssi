@@ -19,13 +19,16 @@ import (
 
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 
 // @host localhost:8080
 // @BasePath /v2
 func main() {
 	r := gin.New()
 
-	r.POST("/v2/testapi/create-did/", api.CreateDid)
+	r.POST("/v2/testapi/create-did", api.CreateDid)
 	r.GET("/v2/testapi/get-did/:some_id", api.GetDid)
 	r.GET("/v2/testapi/get-did-public-key/:some_id", api.GetDidPublicKey)
 

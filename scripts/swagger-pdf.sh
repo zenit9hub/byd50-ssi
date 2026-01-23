@@ -9,4 +9,9 @@ if ! command -v node >/dev/null 2>&1; then
   exit 1
 fi
 
+if [[ ! -d "${HOME}/Library/Caches/ms-playwright" && ! -d "${HOME}/.cache/ms-playwright" ]]; then
+  echo "[swagger-pdf] Playwright browsers not found. Installing..."
+  npx playwright install
+fi
+
 node scripts/html-to-pdf.js

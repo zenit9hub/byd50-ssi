@@ -3,17 +3,37 @@ definitions:
   api.CreateDidRequestBody:
     properties:
       method:
+        example: byd50
         type: string
-      publicKeyBase58:
+      public_key_base58:
+        example: 3VZ6oJdR8i1qKX7kH3Yv9d7w7wzgn...
         type: string
     type: object
-  web.APIError:
+  api.CreateDidResponse:
     properties:
-      createdAt:
+      did:
+        example: did:byd50:1234567890abcdef
         type: string
-      errorCode:
-        type: integer
-      errorMessage:
+    type: object
+  api.ErrorResponse:
+    properties:
+      code:
+        example: INVALID_PARAM
+        type: string
+      message:
+        example: method and public_key_base58 are required
+        type: string
+    type: object
+  api.GetDidPublicKeyResponse:
+    properties:
+      publicKeyBase58:
+        example: 3VZ6oJdR8i1qKX7kH3Yv9d7w7wzgn...
+        type: string
+    type: object
+  api.GetDidResponse:
+    properties:
+      document:
+        example: '{\"@context\":[\"https://www.w3.org/ns/did/v1\"],\"id\":\"did:byd50:123\",\"verificationMethod\":[...]}'
         type: string
     type: object
 host: localhost:8080
@@ -30,13 +50,14 @@ info:
   title: DID Phase 2 Test API
   version: "1.0"
 paths:
-  /testapi/create-did/:
+  /testapi/create-did:
     post:
       consumes:
       - application/json
-      description: create DID
+      description: Create a DID using method and public key.
+      operationId: createDid
       parameters:
-      - description: Some ID
+      - description: Create DID request
         in: body
         name: CreateDidRequestBody
         required: true
@@ -46,22 +67,28 @@ paths:
       - application/json
       responses:
         "200":
-          description: ok
+          description: ok" example({"did":"did:byd50:1234567890abcdef"})
           schema:
-            type: string
+            $ref: '#/definitions/api.CreateDidResponse'
         "400":
-          description: We need Method and PublicKey!!
+          description: bad request" example({"code":"INVALID_PARAM","message":"method
+            and public_key_base58 are required"})
           schema:
-            $ref: '#/definitions/web.APIError'
-        "404":
-          description: Can not find ID
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: internal error" example({"code":"INTERNAL_ERROR","message":"failed
+            to create did"})
           schema:
-            $ref: '#/definitions/web.APIError'
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create DID
   /testapi/get-did-public-key/{some_id}:
     get:
       consumes:
       - application/json
-      description: get DID's public key
+      description: Resolve a DID and return its public key (Base58).
+      operationId: getDidPublicKey
       parameters:
       - description: DID
         in: path
@@ -72,22 +99,28 @@ paths:
       - application/json
       responses:
         "200":
-          description: ok
+          description: ok" example({"publicKeyBase58":"3VZ6oJdR8i1qKX7kH3Yv9d7w7wzgn..."})
           schema:
-            type: string
+            $ref: '#/definitions/api.GetDidPublicKeyResponse'
         "400":
-          description: We need ID!!
+          description: bad request" example({"code":"INVALID_PARAM","message":"did
+            is required"})
           schema:
-            $ref: '#/definitions/web.APIError'
+            $ref: '#/definitions/api.ErrorResponse'
         "404":
-          description: Can not find ID
+          description: not found" example({"code":"NOT_FOUND","message":"public key
+            not found"})
           schema:
-            $ref: '#/definitions/web.APIError'
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get DID Public Key
   /testapi/get-did/{some_id}:
     get:
       consumes:
       - application/json
-      description: get DID's Document
+      description: Resolve a DID and return its DID Document.
+      operationId: getDidDocument
       parameters:
       - description: DID
         in: path
@@ -98,15 +131,25 @@ paths:
       - application/json
       responses:
         "200":
-          description: ok
+          description: ok" example({"document":"{...did document json...}"})
           schema:
-            type: string
+            $ref: '#/definitions/api.GetDidResponse'
         "400":
-          description: We need ID!!
+          description: bad request" example({"code":"INVALID_PARAM","message":"did
+            is required"})
           schema:
-            $ref: '#/definitions/web.APIError'
+            $ref: '#/definitions/api.ErrorResponse'
         "404":
-          description: Can not find ID
+          description: not found" example({"code":"NOT_FOUND","message":"did document
+            not found"})
           schema:
-            $ref: '#/definitions/web.APIError'
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get DID Document
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

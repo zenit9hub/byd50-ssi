@@ -3,11 +3,15 @@
 .env
 .DS_Store
 dist
+node_modules/
+package.json
+package-lock.json
+npm-debug.log
 coverage.out
 coverage.html
 logger.log
 report.xml
-apps/did-sep/main
+apps/did-registrar/main
 apps/did-registry/main
 apps/demo-client/main
 apps/demo-client/main.exe

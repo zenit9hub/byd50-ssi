@@ -9,10 +9,8 @@ if ! command -v npx >/dev/null 2>&1; then
   exit 1
 fi
 
-mkdir -p dist
+mkdir -p api-docs
 
 npx @redocly/cli build-docs apps/did_service_endpoint/docs/swagger.json \
-  --options.expandResponses="200,400,401,500" \
-  --options.requiredPropsFirst=true \
-  --options.pathInMiddlePanel \
-  -o dist/api-docs.html
+  --title "DID ServiceEndpoint API" \
+  -o api-docs/api-docs.html

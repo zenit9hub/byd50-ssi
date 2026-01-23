@@ -18,18 +18,25 @@
     "host": "localhost:8080",
     "basePath": "/v2",
     "paths": {
-        "/testapi/create-did/": {
+        "/testapi/create-did": {
             "post": {
-                "description": "create DID",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create a DID using method and public key.",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
+                "summary": "Create DID",
+                "operationId": "createDid",
                 "parameters": [
                     {
-                        "description": "Some ID",
+                        "description": "Create DID request",
                         "name": "CreateDidRequestBody",
                         "in": "body",
                         "required": true,
@@ -40,21 +47,21 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "ok",
+                        "description": "ok\" example({\"did\":\"did:byd50:1234567890abcdef\"})",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/api.CreateDidResponse"
                         }
                     },
                     "400": {
-                        "description": "We need Method and PublicKey!!",
+                        "description": "bad request\" example({\"code\":\"INVALID_PARAM\",\"message\":\"method and public_key_base58 are required\"})",
                         "schema": {
-                            "$ref": "#/definitions/web.APIError"
+                            "$ref": "#/definitions/api.ErrorResponse"
                         }
                     },
-                    "404": {
-                        "description": "Can not find ID",
+                    "500": {
+                        "description": "internal error\" example({\"code\":\"INTERNAL_ERROR\",\"message\":\"failed to create did\"})",
                         "schema": {
-                            "$ref": "#/definitions/web.APIError"
+                            "$ref": "#/definitions/api.ErrorResponse"
                         }
                     }
                 }
@@ -62,13 +69,20 @@
         },
         "/testapi/get-did-public-key/{some_id}": {
             "get": {
-                "description": "get DID's public key",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Resolve a DID and return its public key (Base58).",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
+                "summary": "Get DID Public Key",
+                "operationId": "getDidPublicKey",
                 "parameters": [
                     {
                         "type": "string",
@@ -80,21 +94,21 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "ok",
+                        "description": "ok\" example({\"publicKeyBase58\":\"3VZ6oJdR8i1qKX7kH3Yv9d7w7wzgn...\"})",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/api.GetDidPublicKeyResponse"
                         }
                     },
                     "400": {
-                        "description": "We need ID!!",
+                        "description": "bad request\" example({\"code\":\"INVALID_PARAM\",\"message\":\"did is required\"})",
                         "schema": {
-                            "$ref": "#/definitions/web.APIError"
+                            "$ref": "#/definitions/api.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Can not find ID",
+                        "description": "not found\" example({\"code\":\"NOT_FOUND\",\"message\":\"public key not found\"})",
                         "schema": {
-                            "$ref": "#/definitions/web.APIError"
+                            "$ref": "#/definitions/api.ErrorResponse"
                         }
                     }
                 }
@@ -102,13 +116,20 @@
         },
         "/testapi/get-did/{some_id}": {
             "get": {
-                "description": "get DID's Document",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Resolve a DID and return its DID Document.",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
+                "summary": "Get DID Document",
+                "operationId": "getDidDocument",
                 "parameters": [
                     {
                         "type": "string",
@@ -120,21 +141,21 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "ok",
+                        "description": "ok\" example({\"document\":\"{...did document json...}\"})",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/api.GetDidResponse"
                         }
                     },
                     "400": {
-                        "description": "We need ID!!",
+                        "description": "bad request\" example({\"code\":\"INVALID_PARAM\",\"message\":\"did is required\"})",
                         "schema": {
-                            "$ref": "#/definitions/web.APIError"
+                            "$ref": "#/definitions/api.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Can not find ID",
+                        "description": "not found\" example({\"code\":\"NOT_FOUND\",\"message\":\"did document not found\"})",
                         "schema": {
-                            "$ref": "#/definitions/web.APIError"
+                            "$ref": "#/definitions/api.ErrorResponse"
                         }
                     }
                 }
@@ -146,26 +167,61 @@
             "type": "object",
             "properties": {
                 "method": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "byd50"
                 },
-                "publicKeyBase58": {
-                    "type": "string"
+                "public_key_base58": {
+                    "type": "string",
+                    "example": "3VZ6oJdR8i1qKX7kH3Yv9d7w7wzgn..."
                 }
             }
         },
-        "web.APIError": {
+        "api.CreateDidResponse": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "errorCode": {
-                    "type": "integer"
-                },
-                "errorMessage": {
-                    "type": "string"
+                "did": {
+                    "type": "string",
+                    "example": "did:byd50:1234567890abcdef"
                 }
             }
+        },
+        "api.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "INVALID_PARAM"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "method and public_key_base58 are required"
+                }
+            }
+        },
+        "api.GetDidPublicKeyResponse": {
+            "type": "object",
+            "properties": {
+                "publicKeyBase58": {
+                    "type": "string",
+                    "example": "3VZ6oJdR8i1qKX7kH3Yv9d7w7wzgn..."
+                }
+            }
+        },
+        "api.GetDidResponse": {
+            "type": "object",
+            "properties": {
+                "document": {
+                    "type": "string",
+                    "example": "{\\\"@context\\\":[\\\"https://www.w3.org/ns/did/v1\\\"],\\\"id\\\":\\\"did:byd50:123\\\",\\\"verificationMethod\\\":[...]}"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }
