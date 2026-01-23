@@ -23,9 +23,9 @@ import (
 	"byd50-ssi/pkg/did/configs"
 	"byd50-ssi/pkg/did/core/dids"
 	"byd50-ssi/pkg/did/pkg/database"
+	"byd50-ssi/pkg/did/registry"
 	pb "byd50-ssi/proto-files"
 	"context"
-	"github.com/syndtr/goleveldb/leveldb"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -35,7 +35,7 @@ const (
 	schemeMethod = "byd50"
 )
 
-var registryDB *leveldb.DB
+var registryStore registry.Store
 
 // server is used to implement proto-files.GreeterServer.
 type server struct {
@@ -43,24 +43,26 @@ type server struct {
 }
 
 // ScCreateDID implements proto-files.GreeterServer
-func (s *server) ScCreateDID(_ context.Context, in *pb.ScCreateDIDsRequest) (*pb.ScCreateDIDsReply, error) {
+func (s *server) ScCreateDID(ctx context.Context, in *pb.ScCreateDIDsRequest) (*pb.ScCreateDIDsReply, error) {
 	pbKey := in.GetPublicKey()
 	method := "byd50"
 	createdDID, doc := dids.CreateDID(method, pbKey)
 
-	registryDB.Put([]byte(createdDID), doc, nil)
+	if err := registryStore.Put(ctx, createdDID, doc); err != nil {
+		log.Printf("[ScCreateDID] - [%v] store error: %v", createdDID, err)
+	}
 
 	log.Printf("[ScCreateDID] - [%v] %s", createdDID, doc)
 	return &pb.ScCreateDIDsReply{Did: createdDID}, nil
 }
 
 // ScResolveDID implements proto-files.GreeterServer
-func (s *server) ScResolveDID(_ context.Context, in *pb.ScResolveDIDsRequest) (*pb.ScResolveDIDsReply, error) {
+func (s *server) ScResolveDID(ctx context.Context, in *pb.ScResolveDIDsRequest) (*pb.ScResolveDIDsReply, error) {
 	// resolve DID's Document
 	var resolutionError string
 	var didDocument string
 	var didDocumentMetadata string
-	docuByteArray, err := registryDB.Get([]byte(in.GetDid()), nil)
+	docuByteArray, err := registryStore.Get(ctx, in.GetDid())
 
 	if err != nil {
 		resolutionError = dids.NotFound.String()
@@ -74,16 +76,18 @@ func (s *server) ScResolveDID(_ context.Context, in *pb.ScResolveDIDsRequest) (*
 }
 
 // ScUpdateDID implements proto-files.GreeterServer
-func (s *server) ScUpdateDID(_ context.Context, in *pb.ScUpdateDIDsRequest) (*pb.ScUpdateDIDsReply, error) {
+func (s *server) ScUpdateDID(ctx context.Context, in *pb.ScUpdateDIDsRequest) (*pb.ScUpdateDIDsReply, error) {
 	// update DID's Document
 	result := "success"
 
 	//validation check
 	//if an error -> result = "Invalid document"
 
-	ret, err := registryDB.Has([]byte(in.GetDid()), nil)
+	ret, err := registryStore.Has(ctx, in.GetDid())
 	if ret {
-		registryDB.Put([]byte(in.GetDid()), []byte(in.GetDocument()), nil)
+		if err := registryStore.Put(ctx, in.GetDid(), []byte(in.GetDocument())); err != nil {
+			log.Printf("error caused by.. err[%v], ret[%v]", err, ret)
+		}
 		log.Printf("ScUpdateDID(%v) - [%v] %v", result, in.GetDid(), in.GetDocument())
 	} else {
 		log.Printf("error caused by.. err[%v], ret[%v]", err, ret)
@@ -94,12 +98,18 @@ func (s *server) ScUpdateDID(_ context.Context, in *pb.ScUpdateDIDsRequest) (*pb
 
 func initRegistry() {
 	db, _ := database.Initialize()
-	registryDB = db
+	store, err := registry.NewLevelDBStore(db)
+	if err != nil {
+		log.Fatalf("failed to init registry store: %v", err)
+	}
+	registryStore = store
 }
 
 func main() {
 	initRegistry()
-	defer registryDB.Close()
+	if store, ok := registryStore.(*registry.LevelDBStore); ok {
+		defer store.Close()
+	}
 
 	lis, err := net.Listen("tcp", configs.UseConfig.DidRegistryPort)
 	if err != nil {
