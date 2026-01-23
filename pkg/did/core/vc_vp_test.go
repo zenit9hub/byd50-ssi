@@ -2,6 +2,7 @@ package core_test
 
 import (
 	"byd50-ssi/pkg/did/core"
+	byd50_jwt "byd50-ssi/pkg/did/core/byd50-jwt"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -58,5 +59,45 @@ func TestVerifyVcAndVp(t *testing.T) {
 	}
 	if _, err := core.ClaimsGetIat(claims); err != nil {
 		t.Fatalf("claims iat failed: %v", err)
+	}
+}
+
+func TestValidateClaims(t *testing.T) {
+	now := time.Now()
+
+	vcClaims := byd50_jwt.VcClaims{
+		Nonce: "n",
+		Vc:    map[string]interface{}{"type": []string{"VerifiableCredential"}},
+		StandardClaims: jwt.StandardClaims{
+			Issuer:    "issuer",
+			ExpiresAt: now.Add(time.Minute).Unix(),
+			IssuedAt:  now.Unix(),
+			NotBefore: now.Unix(),
+		},
+	}
+	if err := core.ValidateVcClaims(vcClaims); err != nil {
+		t.Fatalf("vc claims should be valid: %v", err)
+	}
+	vcClaims.ExpiresAt = now.Add(-time.Minute).Unix()
+	if err := core.ValidateVcClaims(vcClaims); err == nil {
+		t.Fatal("expected vc claims expiry error")
+	}
+
+	vpClaims := byd50_jwt.VpClaims{
+		Nonce: "n",
+		Vp:    map[string]interface{}{"type": []string{"VerifiablePresentation"}},
+		StandardClaims: jwt.StandardClaims{
+			Issuer:    "issuer",
+			ExpiresAt: now.Add(time.Minute).Unix(),
+			IssuedAt:  now.Unix(),
+			NotBefore: now.Unix(),
+		},
+	}
+	if err := core.ValidateVpClaims(vpClaims); err != nil {
+		t.Fatalf("vp claims should be valid: %v", err)
+	}
+	vpClaims.Issuer = ""
+	if err := core.ValidateVpClaims(vpClaims); err == nil {
+		t.Fatal("expected vp claims issuer error")
 	}
 }
