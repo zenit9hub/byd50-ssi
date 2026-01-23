@@ -160,6 +160,190 @@
                     }
                 }
             }
+        },
+        "/testapi/vc/create": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create a Verifiable Credential (JWT) signed by the issuer's private key.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create VC",
+                "operationId": "createVc",
+                "parameters": [
+                    {
+                        "description": "Create VC request",
+                        "name": "CreateVcRequestBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.CreateVcRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok\" example({\"vc_jwt\":\"eyJhbGciOi...\"} )",
+                        "schema": {
+                            "$ref": "#/definitions/api.CreateVcResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request\" example({\"code\":\"INVALID_PARAM\",\"message\":\"kid, pv_key_base58, and credential_subject are required\"})",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "internal error\" example({\"code\":\"INTERNAL_ERROR\",\"message\":\"failed to create vc\"})",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/testapi/vc/verify": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Verify a VC (JWT) using DID resolver for public key lookup.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Verify VC",
+                "operationId": "verifyVc",
+                "parameters": [
+                    {
+                        "description": "Verify VC request",
+                        "name": "VerifyVcRequestBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.VerifyVcRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok\" example({\"valid\":true})",
+                        "schema": {
+                            "$ref": "#/definitions/api.VerifyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request\" example({\"code\":\"INVALID_PARAM\",\"message\":\"vc_jwt is required\"})",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/testapi/vp/create": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create a Verifiable Presentation (JWT) from VC JWTs.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create VP",
+                "operationId": "createVp",
+                "parameters": [
+                    {
+                        "description": "Create VP request",
+                        "name": "CreateVpRequestBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.CreateVpRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok\" example({\"vp_jwt\":\"eyJhbGciOi...\"} )",
+                        "schema": {
+                            "$ref": "#/definitions/api.CreateVpResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request\" example({\"code\":\"INVALID_PARAM\",\"message\":\"holder_did, pv_key_base58, and vc_jwts are required\"})",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "internal error\" example({\"code\":\"INTERNAL_ERROR\",\"message\":\"failed to create vp\"})",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/testapi/vp/verify": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Verify a VP (JWT) using DID resolver for public key lookup.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Verify VP",
+                "operationId": "verifyVp",
+                "parameters": [
+                    {
+                        "description": "Verify VP request",
+                        "name": "VerifyVpRequestBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.VerifyVpRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok\" example({\"valid\":true})",
+                        "schema": {
+                            "$ref": "#/definitions/api.VerifyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request\" example({\"code\":\"INVALID_PARAM\",\"message\":\"vp_jwt is required\"})",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -182,6 +366,92 @@
                 "did": {
                     "type": "string",
                     "example": "did:byd50:1234567890abcdef"
+                }
+            }
+        },
+        "api.CreateVcRequestBody": {
+            "type": "object",
+            "properties": {
+                "credential_subject": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "expires_in_minutes": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "issuer": {
+                    "type": "string",
+                    "example": "http://demo-issuer.example"
+                },
+                "kid": {
+                    "type": "string",
+                    "example": "did:byd50:1234567890abcdef"
+                },
+                "pv_key_base58": {
+                    "type": "string",
+                    "example": "3VZ6oJdR8i1qKX7kH3Yv9d7w7wzgn..."
+                },
+                "subject": {
+                    "type": "string",
+                    "example": "did:byd50:holder123"
+                },
+                "type": {
+                    "type": "string",
+                    "example": "AlumniCredential"
+                }
+            }
+        },
+        "api.CreateVcResponse": {
+            "type": "object",
+            "properties": {
+                "vc_jwt": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+            }
+        },
+        "api.CreateVpRequestBody": {
+            "type": "object",
+            "properties": {
+                "expires_in_minutes": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "holder_did": {
+                    "type": "string",
+                    "example": "did:byd50:holder123"
+                },
+                "issuer": {
+                    "type": "string",
+                    "example": "client make this vp"
+                },
+                "pv_key_base58": {
+                    "type": "string",
+                    "example": "3VZ6oJdR8i1qKX7kH3Yv9d7w7wzgn..."
+                },
+                "subject": {
+                    "type": "string",
+                    "example": "did:byd50:holder123"
+                },
+                "type": {
+                    "type": "string",
+                    "example": "CredentialManagerPresentation"
+                },
+                "vc_jwts": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "api.CreateVpResponse": {
+            "type": "object",
+            "properties": {
+                "vp_jwt": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9..."
                 }
             }
         },
@@ -213,6 +483,37 @@
                 "document": {
                     "type": "string",
                     "example": "{\\\"@context\\\":[\\\"https://www.w3.org/ns/did/v1\\\"],\\\"id\\\":\\\"did:byd50:123\\\",\\\"verificationMethod\\\":[...]}"
+                }
+            }
+        },
+        "api.VerifyResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "signature invalid"
+                },
+                "valid": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "api.VerifyVcRequestBody": {
+            "type": "object",
+            "properties": {
+                "vc_jwt": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+            }
+        },
+        "api.VerifyVpRequestBody": {
+            "type": "object",
+            "properties": {
+                "vp_jwt": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9..."
                 }
             }
         }

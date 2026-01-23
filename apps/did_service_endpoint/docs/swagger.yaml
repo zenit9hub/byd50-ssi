@@ -15,6 +15,67 @@ definitions:
         example: did:byd50:1234567890abcdef
         type: string
     type: object
+  api.CreateVcRequestBody:
+    properties:
+      credential_subject:
+        additionalProperties: true
+        type: object
+      expires_in_minutes:
+        example: 5
+        type: integer
+      issuer:
+        example: http://demo-issuer.example
+        type: string
+      kid:
+        example: did:byd50:1234567890abcdef
+        type: string
+      pv_key_base58:
+        example: 3VZ6oJdR8i1qKX7kH3Yv9d7w7wzgn...
+        type: string
+      subject:
+        example: did:byd50:holder123
+        type: string
+      type:
+        example: AlumniCredential
+        type: string
+    type: object
+  api.CreateVcResponse:
+    properties:
+      vc_jwt:
+        example: eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
+  api.CreateVpRequestBody:
+    properties:
+      expires_in_minutes:
+        example: 5
+        type: integer
+      holder_did:
+        example: did:byd50:holder123
+        type: string
+      issuer:
+        example: client make this vp
+        type: string
+      pv_key_base58:
+        example: 3VZ6oJdR8i1qKX7kH3Yv9d7w7wzgn...
+        type: string
+      subject:
+        example: did:byd50:holder123
+        type: string
+      type:
+        example: CredentialManagerPresentation
+        type: string
+      vc_jwts:
+        items:
+          type: string
+        type: array
+    type: object
+  api.CreateVpResponse:
+    properties:
+      vp_jwt:
+        example: eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
   api.ErrorResponse:
     properties:
       code:
@@ -34,6 +95,27 @@ definitions:
     properties:
       document:
         example: '{\"@context\":[\"https://www.w3.org/ns/did/v1\"],\"id\":\"did:byd50:123\",\"verificationMethod\":[...]}'
+        type: string
+    type: object
+  api.VerifyResponse:
+    properties:
+      error:
+        example: signature invalid
+        type: string
+      valid:
+        example: true
+        type: boolean
+    type: object
+  api.VerifyVcRequestBody:
+    properties:
+      vc_jwt:
+        example: eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
+  api.VerifyVpRequestBody:
+    properties:
+      vp_jwt:
+        example: eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9...
         type: string
     type: object
 host: localhost:8080
@@ -147,6 +229,129 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get DID Document
+  /testapi/vc/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a Verifiable Credential (JWT) signed by the issuer's private
+        key.
+      operationId: createVc
+      parameters:
+      - description: Create VC request
+        in: body
+        name: CreateVcRequestBody
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateVcRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok" example({"vc_jwt":"eyJhbGciOi..."} )
+          schema:
+            $ref: '#/definitions/api.CreateVcResponse'
+        "400":
+          description: bad request" example({"code":"INVALID_PARAM","message":"kid,
+            pv_key_base58, and credential_subject are required"})
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: internal error" example({"code":"INTERNAL_ERROR","message":"failed
+            to create vc"})
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create VC
+  /testapi/vc/verify:
+    post:
+      consumes:
+      - application/json
+      description: Verify a VC (JWT) using DID resolver for public key lookup.
+      operationId: verifyVc
+      parameters:
+      - description: Verify VC request
+        in: body
+        name: VerifyVcRequestBody
+        required: true
+        schema:
+          $ref: '#/definitions/api.VerifyVcRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok" example({"valid":true})
+          schema:
+            $ref: '#/definitions/api.VerifyResponse'
+        "400":
+          description: bad request" example({"code":"INVALID_PARAM","message":"vc_jwt
+            is required"})
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Verify VC
+  /testapi/vp/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a Verifiable Presentation (JWT) from VC JWTs.
+      operationId: createVp
+      parameters:
+      - description: Create VP request
+        in: body
+        name: CreateVpRequestBody
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateVpRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok" example({"vp_jwt":"eyJhbGciOi..."} )
+          schema:
+            $ref: '#/definitions/api.CreateVpResponse'
+        "400":
+          description: bad request" example({"code":"INVALID_PARAM","message":"holder_did,
+            pv_key_base58, and vc_jwts are required"})
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: internal error" example({"code":"INTERNAL_ERROR","message":"failed
+            to create vp"})
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create VP
+  /testapi/vp/verify:
+    post:
+      consumes:
+      - application/json
+      description: Verify a VP (JWT) using DID resolver for public key lookup.
+      operationId: verifyVp
+      parameters:
+      - description: Verify VP request
+        in: body
+        name: VerifyVpRequestBody
+        required: true
+        schema:
+          $ref: '#/definitions/api.VerifyVpRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok" example({"valid":true})
+          schema:
+            $ref: '#/definitions/api.VerifyResponse'
+        "400":
+          description: bad request" example({"code":"INVALID_PARAM","message":"vp_jwt
+            is required"})
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Verify VP
 securityDefinitions:
   ApiKeyAuth:
     in: header
