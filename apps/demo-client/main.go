@@ -23,6 +23,7 @@ import (
 	"byd50-ssi/pkg/did/configs"
 	"byd50-ssi/pkg/did/core"
 	byd50_jwt "byd50-ssi/pkg/did/core/byd50-jwt"
+	"byd50-ssi/pkg/did/kms"
 	"byd50-ssi/pkg/did/pkg/controller"
 	"byd50-ssi/pkg/did/pkg/logger"
 	pb "byd50-ssi/proto-files"
@@ -49,7 +50,7 @@ var (
 	issuerClient pb.IssuerClient
 )
 
-func mustPvKeyECDSA(dkms core.KMS) *ecdsa.PrivateKey {
+func mustPvKeyECDSA(dkms kms.KMS) *ecdsa.PrivateKey {
 	pvKey, err := dkms.PvKeyECDSA()
 	if err != nil {
 		log.Fatalf("invalid ECDSA private key: %v", err)
@@ -89,7 +90,7 @@ func GetIssuerClient(serviceHost string) pb.IssuerClient {
 	return issuerClient
 }
 
-func UseCase1DefaultAuthentication(dkms core.KMS) {
+func UseCase1DefaultAuthentication(dkms kms.KMS) {
 	logger.FuncStart()
 
 	// Set up a connection to the server.
@@ -126,7 +127,7 @@ func UseCase1DefaultAuthentication(dkms core.KMS) {
 	logger.FuncEnd()
 }
 
-func UseCase2SimpleAuthentication(dkms core.KMS) {
+func UseCase2SimpleAuthentication(dkms kms.KMS) {
 	logger.FuncStart()
 
 	// Set up a connection to the server.
@@ -153,7 +154,7 @@ func UseCase2SimpleAuthentication(dkms core.KMS) {
 	logger.FuncEnd()
 }
 
-func UseCase3RequestCredential(dkms core.KMS) {
+func UseCase3RequestCredential(dkms kms.KMS) {
 	logger.FuncStart()
 
 	// Set up a connection to the server.
@@ -318,7 +319,7 @@ func geth() {
 
 func main() {
 	// Initialize KMS
-	myKMS, err := core.InitKMS(core.KeyTypeRSA)
+	myKMS, err := kms.InitKMS(kms.KeyTypeRSA)
 	if err != nil {
 		log.Fatalf("could not Init KMS (%v)", err.Error())
 	}
@@ -336,7 +337,7 @@ func main() {
 
 	// Use Case 3. Simple Authentication
 	// Initialize KMS
-	myKMS, err = core.InitKMS(core.KeyTypeECDSA)
+	myKMS, err = kms.InitKMS(kms.KeyTypeECDSA)
 	// Create DID
 	did = controller.CreateDID(myKMS.PbKeyBase58(), method)
 	myKMS.SetDid(did)

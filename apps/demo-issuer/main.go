@@ -23,6 +23,7 @@ import (
 	"byd50-ssi/pkg/did/configs"
 	"byd50-ssi/pkg/did/core"
 	byd50_jwt "byd50-ssi/pkg/did/core/byd50-jwt"
+	"byd50-ssi/pkg/did/kms"
 	"byd50-ssi/pkg/did/pkg/controller"
 	pb "byd50-ssi/proto-files"
 	"context"
@@ -39,14 +40,14 @@ import (
 
 var sourceData = "randomStr;2021-06-08T14:04:43UTC"
 var issuerDid string
-var myDkms core.KMS
+var myDkms kms.KMS
 
 // server is used to implement proto-files.GreeterServer.
 type server struct {
 	pb.UnimplementedIssuerServer
 }
 
-func mustPvKeyECDSA(dkms core.KMS) *ecdsa.PrivateKey {
+func mustPvKeyECDSA(dkms kms.KMS) *ecdsa.PrivateKey {
 	pvKey, err := dkms.PvKeyECDSA()
 	if err != nil {
 		log.Fatalf("invalid ECDSA private key: %v", err)
@@ -305,7 +306,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	// Initialize KMS
-	myDkms, err = core.InitKMS(core.KeyTypeECDSA)
+	myDkms, err = kms.InitKMS(kms.KeyTypeECDSA)
 	log.Printf("pvkey : %v", mustPvKeyECDSA(myDkms))
 	if err != nil {
 		log.Fatalf("could not Init KMS (%v)", err.Error())

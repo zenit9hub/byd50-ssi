@@ -29,6 +29,10 @@ check_port() {
   local port="$1"
   if command -v lsof >/dev/null 2>&1; then
     if lsof -iTCP:"${port}" -sTCP:LISTEN >/dev/null 2>&1; then
+      if [[ "${DEV_UP_STRICT_PORTS:-}" == "1" ]]; then
+        echo "[dev-up] error: port ${port} already in use" >&2
+        exit 1
+      fi
       echo "[dev-up] warning: port ${port} already in use" >&2
     fi
   fi

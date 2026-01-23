@@ -1,6 +1,7 @@
-package core
+package kms
 
 import (
+	didcore "byd50-ssi/pkg/did/core"
 	"byd50-ssi/pkg/keys"
 	"crypto/ecdsa"
 	"crypto/elliptic"
@@ -145,19 +146,19 @@ func (p *KMS) SetDid(did string) error {
 }
 
 func (p *KMS) Sign(message string) (bool, string) {
-	return PvKeySign(p.privateKeyBase58, message, "")
+	return didcore.PvKeySign(p.privateKeyBase58, message, "")
 }
 
 func (p *KMS) Verify(message, signature string) bool {
-	return PbKeyVerify(p.publicKeyBase58, message, signature)
+	return didcore.PbKeyVerify(p.publicKeyBase58, message, signature)
 }
 
 func (p *KMS) Encrypt(plainText string) string {
-	return PbKeyEncrypt(p.publicKeyBase58, plainText)
+	return didcore.PbKeyEncrypt(p.publicKeyBase58, plainText)
 }
 
 func (p *KMS) Decrypt(ciphertextBase64 string) string {
-	return PvKeyDecrypt(ciphertextBase64, p.privateKeyBase58)
+	return didcore.PvKeyDecrypt(ciphertextBase64, p.privateKeyBase58)
 }
 
 var kms KMS

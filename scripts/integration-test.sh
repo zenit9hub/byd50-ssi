@@ -19,8 +19,11 @@ cleanup() {
 }
 trap cleanup EXIT
 
+echo "[integration-test] ensuring dev services are stopped"
+"${ROOT_DIR}/scripts/dev-down.sh" || true
+
 echo "[integration-test] starting services"
-make -C "${ROOT_DIR}" dev-up
+DEV_UP_STRICT_PORTS=1 make -C "${ROOT_DIR}" dev-up
 
 echo "[integration-test] running integration tests"
 go test -v -tags=integration ./test/...

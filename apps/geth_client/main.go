@@ -2,9 +2,9 @@ package main
 
 import (
 	"byd50-ssi/pkg/did/c-shared/foo"
-	"byd50-ssi/pkg/did/core"
 	"byd50-ssi/pkg/did/core/dids"
 	"byd50-ssi/pkg/did/core/driver/scdid"
+	"byd50-ssi/pkg/did/kms"
 	"crypto/ecdsa"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts"
@@ -97,7 +97,7 @@ func main() {
 	newKeyAddr := crypto.PubkeyToAddress(*newKeyPbKeyECDSA).Hex()
 	fmt.Printf("bytes: %v\n newKeyAddr: %v\n", bytes, newKeyAddr)
 
-	myKMS, err := core.InitKMS(core.KeyTypeECDSA)
+	myKMS, err := kms.InitKMS(kms.KeyTypeECDSA)
 	if err != nil {
 		log.Fatalf("Failed to init KMS: %v", err)
 	}

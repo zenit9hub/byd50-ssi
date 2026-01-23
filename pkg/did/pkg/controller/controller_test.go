@@ -3,6 +3,7 @@ package controller
 import (
 	"byd50-ssi/pkg/did/core"
 	"byd50-ssi/pkg/did/core/dids"
+	"byd50-ssi/pkg/did/kms"
 	pb "byd50-ssi/proto-files"
 	"context"
 	"encoding/json"
@@ -48,7 +49,7 @@ func TestControllerFlow(t *testing.T) {
 	fake := &fakeRegistrarClient{docs: map[string]string{}}
 	registrarClientProvider = func() pb.RegistrarClient { return fake }
 
-	dkms, err := core.InitKMS(core.KeyTypeRSA)
+	dkms, err := kms.InitKMS(kms.KeyTypeRSA)
 	if err != nil {
 		t.Fatal(err)
 	}

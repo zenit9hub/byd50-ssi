@@ -5,6 +5,7 @@ import (
 	"byd50-ssi/pkg/did/core"
 	byd50_jwt "byd50-ssi/pkg/did/core/byd50-jwt"
 	"byd50-ssi/pkg/did/core/dids"
+	"byd50-ssi/pkg/did/kms"
 	"encoding/pem"
 	"errors"
 	"github.com/golang-jwt/jwt"
@@ -41,7 +42,7 @@ func TestContains(t *testing.T) {
 }
 
 func TestKMS(t *testing.T) {
-	dkmsEcdsa, err := core.InitKMS(core.KeyTypeECDSA)
+	dkmsEcdsa, err := kms.InitKMS(kms.KeyTypeECDSA)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -53,11 +54,11 @@ func TestKMS(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	core.InitKMSwithKeyPair(pvKeyEcdsa, pbKeyEcdsa)
-	core.InitKMSwithKeyPair(nil, nil)
-	core.InitKMS("")
+	kms.InitKMSwithKeyPair(pvKeyEcdsa, pbKeyEcdsa)
+	kms.InitKMSwithKeyPair(nil, nil)
+	kms.InitKMS("")
 
-	dkms, err := core.InitKMS(core.KeyTypeRSA)
+	dkms, err := kms.InitKMS(kms.KeyTypeRSA)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -81,7 +82,7 @@ func TestKMS(t *testing.T) {
 	dkms.SetPbKeyBase58(dkms.PbKeyBase58())
 	dkms.SetDid(dkms.Did())
 
-	core.InitKMSwithKeyPair(pvKeyRsa, pbKeyRsa)
+	kms.InitKMSwithKeyPair(pvKeyRsa, pbKeyRsa)
 
 	err = pvKeyRsa.Validate()
 	if err != nil {
@@ -90,7 +91,7 @@ func TestKMS(t *testing.T) {
 }
 
 func TestKeyExport(t *testing.T) {
-	myDkms, err := core.InitKMS(core.KeyTypeRSA)
+	myDkms, err := kms.InitKMS(kms.KeyTypeRSA)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,7 +115,7 @@ func TestKeyExport(t *testing.T) {
 }
 
 func TestEncryptDecrypt(t *testing.T) {
-	myDkms := core.GetKMS()
+	myDkms := kms.GetKMS()
 	plainText := "TestEncryptDecrypt"
 	encryptedText := core.PbKeyEncrypt(myDkms.PbKeyBase58(), plainText)
 	decryptedText := core.PvKeyDecrypt(encryptedText, myDkms.PvKeyBase58())
@@ -130,7 +131,7 @@ func TestEncryptDecrypt(t *testing.T) {
 }
 
 func TestSignVerify(t *testing.T) {
-	myDkms := core.GetKMS()
+	myDkms := kms.GetKMS()
 	plainText := "TestEncryptDecrypt"
 	ret, result := core.PvKeySign(myDkms.PvKeyBase58(), plainText, "")
 	if !ret {
@@ -159,7 +160,7 @@ func TestRandomString(t *testing.T) {
 }
 
 //func TestCreateResolveDID(t *testing.T) {
-//	myDkms := core.GetKMS()
+//	myDkms := kms.GetKMS()
 //	createdDid := core.CreateDID(myDkms.PbKeyBase58(), "byd50")
 //	createdDoc := core.ResolveDID(createdDid)
 //	t.Logf("createdDid: %v\n createdDoc: %v\n", createdDid, string(createdDoc))
@@ -167,7 +168,7 @@ func TestRandomString(t *testing.T) {
 
 func TestVC(t *testing.T) {
 	// ******************** KeyTypeECDSA ******************** //
-	issuerDkmsEcdsa, err := core.InitKMS(core.KeyTypeECDSA)
+	issuerDkmsEcdsa, err := kms.InitKMS(kms.KeyTypeECDSA)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -231,7 +232,7 @@ func TestVC(t *testing.T) {
 func TestVP(t *testing.T) {
 	// ******************** Sequence 1 preparing for vc ******************** //
 	// ******************** KeyTypeECDSA ******************** //
-	issuerDkmsEcdsa, err := core.InitKMS(core.KeyTypeECDSA)
+	issuerDkmsEcdsa, err := kms.InitKMS(kms.KeyTypeECDSA)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -250,7 +251,7 @@ func TestVP(t *testing.T) {
 	vcJwt := byd50_jwt.MakeVcSample(kid, issuerPvKey)
 	t.Logf(" -- vc sample jwt --\n%v", vcJwt)
 
-	holderDkmsEcdsa, err := core.InitKMS(core.KeyTypeECDSA)
+	holderDkmsEcdsa, err := kms.InitKMS(kms.KeyTypeECDSA)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -312,7 +313,7 @@ func TestVP(t *testing.T) {
 }
 
 func TestKMSExportsECDSA(t *testing.T) {
-	dkms, err := core.InitKMS(core.KeyTypeECDSA)
+	dkms, err := kms.InitKMS(kms.KeyTypeECDSA)
 	if err != nil {
 		t.Fatal(err)
 	}

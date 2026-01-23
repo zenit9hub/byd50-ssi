@@ -6,6 +6,7 @@ package main_test
 import (
 	"byd50-ssi/pkg/did/core"
 	"byd50-ssi/pkg/did/core/byd50-jwt"
+	"byd50-ssi/pkg/did/kms"
 	"byd50-ssi/pkg/did/pkg/controller"
 	"crypto/ecdsa"
 	"crypto/rsa"
@@ -18,7 +19,7 @@ import (
 
 func TestInitKMS(t *testing.T) {
 	// ******************** KeyTypeRSA Test ******************** //
-	dkms, err := core.InitKMS(core.KeyTypeRSA)
+	dkms, err := kms.InitKMS(kms.KeyTypeRSA)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -33,7 +34,7 @@ func TestInitKMS(t *testing.T) {
 }
 
 func TestEncryptDecrypt(t *testing.T) {
-	myDkms := core.GetKMS()
+	myDkms := kms.GetKMS()
 	plainText := "TestEncryptDecrypt"
 	encryptedText := myDkms.Encrypt(plainText)
 	decryptedText := myDkms.Decrypt(encryptedText)
@@ -43,7 +44,7 @@ func TestEncryptDecrypt(t *testing.T) {
 }
 
 func TestSignVerify(t *testing.T) {
-	myDkms := core.GetKMS()
+	myDkms := kms.GetKMS()
 	plainText := "TestEncryptDecrypt"
 	ret, result := core.PvKeySign(myDkms.PvKeyBase58(), plainText, "")
 	if !ret {
@@ -56,7 +57,7 @@ func TestSignVerify(t *testing.T) {
 }
 
 func TestVerifyAuthChallengeAndResponse(t *testing.T) {
-	myDkms := core.GetKMS()
+	myDkms := kms.GetKMS()
 	method := "byd50"
 	did := controller.CreateDID(myDkms.PbKeyBase58(), method)
 	plainText := "TestVerifyAuthChallengeAndResponse"
@@ -68,7 +69,7 @@ func TestVerifyAuthChallengeAndResponse(t *testing.T) {
 }
 
 func TestVerifySimplePresent(t *testing.T) {
-	myDkms := core.GetKMS()
+	myDkms := kms.GetKMS()
 	method := "byd50"
 	did := controller.CreateDID(myDkms.PbKeyBase58(), method)
 	myDkms.SetDid(did)
@@ -80,7 +81,7 @@ func TestVerifySimplePresent(t *testing.T) {
 }
 
 func TestKeyExport(t *testing.T) {
-	myDkms := core.GetKMS()
+	myDkms := kms.GetKMS()
 	pvKeyPem := core.ExportPrivateKeyAsPEM(myDkms.PvKey())
 	if pvKeyPem != myDkms.PvKeyPEM() {
 		t.Fatal(errors.New("export result error"))
@@ -95,11 +96,11 @@ func TestKeyExport(t *testing.T) {
 }
 
 func TestCreateAndResolveDID(t *testing.T) {
-	_, err := core.InitKMS(core.KeyTypeRSA)
+	_, err := kms.InitKMS(kms.KeyTypeRSA)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	myDkms := core.GetKMS()
+	myDkms := kms.GetKMS()
 	method := "byd50"
 	did := controller.CreateDID(myDkms.PbKeyBase58(), method)
 	myDkms.SetDid(did)
@@ -114,7 +115,7 @@ func TestCreateAndResolveDID(t *testing.T) {
 }
 
 func TestGetPublicKey(t *testing.T) {
-	myDkms := core.GetKMS()
+	myDkms := kms.GetKMS()
 	method := "byd50"
 	did := controller.CreateDID(myDkms.PbKeyBase58(), method)
 	pbKey := controller.GetPublicKey(did, "")
@@ -125,7 +126,7 @@ func TestGetPublicKey(t *testing.T) {
 
 func TestMakeVcAndVerify(t *testing.T) {
 	// ******************** KeyTypeECDSA ******************** //
-	issuerDkmsEcdsa, err := core.InitKMS(core.KeyTypeECDSA)
+	issuerDkmsEcdsa, err := kms.InitKMS(kms.KeyTypeECDSA)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -186,7 +187,7 @@ func TestMakeVcAndVerify(t *testing.T) {
 func TestMakeVpAndVerify(t *testing.T) {
 	// ******************** Sequence 1 preparing for vc ******************** //
 	// ******************** KeyTypeECDSA ******************** //
-	issuerDkmsEcdsa, err := core.InitKMS(core.KeyTypeECDSA)
+	issuerDkmsEcdsa, err := kms.InitKMS(kms.KeyTypeECDSA)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -205,7 +206,7 @@ func TestMakeVpAndVerify(t *testing.T) {
 	valid, err := core.VerifyVc(vcJwt, controller.GetPublicKey)
 	t.Logf("token.Valid (%v), err (%v)", valid, err)
 
-	holderDkmsEcdsa, err := core.InitKMS(core.KeyTypeECDSA)
+	holderDkmsEcdsa, err := kms.InitKMS(kms.KeyTypeECDSA)
 	if err != nil {
 		t.Fatal(err.Error())
 	}

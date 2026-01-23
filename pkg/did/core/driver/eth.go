@@ -80,7 +80,7 @@ func (m *DidMethodETH) CreateDid(pbKeyBase58 string) (string, error) {
 
 	fmt.Println("contract is loaded")
 
-	//myDKMS := core.GetKMS()
+	//myDKMS := kms.GetKMS()
 	//pvKeyECDSA, ok := myDKMS.PvKey().(*ecdsa.PrivateKey)
 	//pvKeyECDSA, err := toECDSAFromHex("e757f43e4d62c271e0e4713fe8e33f8451fc379026ed01dd02a933b9ae750c9d")
 	privateKeyHex, err := loadEthPrivateKeyHex()

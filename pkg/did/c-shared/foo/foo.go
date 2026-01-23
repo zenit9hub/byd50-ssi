@@ -3,6 +3,7 @@ package foo
 import (
 	"byd50-ssi/pkg/did/core"
 	byd50_jwt "byd50-ssi/pkg/did/core/byd50-jwt"
+	"byd50-ssi/pkg/did/kms"
 	"crypto/x509"
 	"encoding/json"
 	"errors"
@@ -13,19 +14,19 @@ import (
 )
 
 func CreateKeyPairForAndr() {
-	_, err := core.InitKMS(core.KeyTypeECDSA)
+	_, err := kms.InitKMS(kms.KeyTypeECDSA)
 	if err != nil {
 		panic(err)
 	}
 }
 
 func GetPrivateKeyBase58() string {
-	dkms := core.GetKMS()
+	dkms := kms.GetKMS()
 	return dkms.PvKeyBase58()
 }
 
 func GetPublicKeyBase58() string {
-	dkms := core.GetKMS()
+	dkms := kms.GetKMS()
 	return dkms.PbKeyBase58()
 }
 
