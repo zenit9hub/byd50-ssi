@@ -69,7 +69,7 @@ start_service() {
 
 # Start servers
 start_service "did-registry" "go run ./apps/did-registry/main.go"
-start_service "did-sep" "go run ./apps/did-sep/main.go"
+start_service "did-registrar" "go run ./apps/did-registrar/main.go"
 start_service "demo-issuer" "go run ./apps/demo-issuer/main.go"
 start_service "demo-rp" "go run ./apps/demo-rp/main.go"
 

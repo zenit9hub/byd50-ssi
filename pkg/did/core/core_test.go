@@ -99,7 +99,7 @@ func TestKeyExport(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	pvKeyPem := core.ExportPrivateKeyAsPEM(pvKey)
+	pvKeyPem := kms.ExportPrivateKeyAsPEM(pvKey)
 	if pvKeyPem != myDkms.PvKeyPEM() {
 		t.Fatal(errors.New("export result error"))
 	}
@@ -325,29 +325,29 @@ func TestKMSExportsECDSA(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if core.ExportPrivateKeyAsPEM(pvKey) == "" {
+	if kms.ExportPrivateKeyAsPEM(pvKey) == "" {
 		t.Fatal(errors.New("ecdsa private key pem empty"))
 	}
-	if core.ExportPublicKeyAsPEM(pbKey) == "" {
+	if kms.ExportPublicKeyAsPEM(pbKey) == "" {
 		t.Fatal(errors.New("ecdsa public key pem empty"))
 	}
-	if core.ExportPrivateKeyAsBase58(pvKey) == "" {
+	if kms.ExportPrivateKeyAsBase58(pvKey) == "" {
 		t.Fatal(errors.New("ecdsa private key base58 empty"))
 	}
-	if core.ExportPublicKeyAsBase58(pbKey) == "" {
+	if kms.ExportPublicKeyAsBase58(pbKey) == "" {
 		t.Fatal(errors.New("ecdsa public key base58 empty"))
 	}
 
-	if core.ExportPrivateKeyAsPEM("bad") != "" {
+	if kms.ExportPrivateKeyAsPEM("bad") != "" {
 		t.Fatal(errors.New("unexpected pem for invalid private key"))
 	}
-	if core.ExportPublicKeyAsPEM("bad") != "" {
+	if kms.ExportPublicKeyAsPEM("bad") != "" {
 		t.Fatal(errors.New("unexpected pem for invalid public key"))
 	}
-	if core.ExportPrivateKeyAsBase58("bad") != "" {
+	if kms.ExportPrivateKeyAsBase58("bad") != "" {
 		t.Fatal(errors.New("unexpected base58 for invalid private key"))
 	}
-	if core.ExportPublicKeyAsBase58("bad") != "" {
+	if kms.ExportPublicKeyAsBase58("bad") != "" {
 		t.Fatal(errors.New("unexpected base58 for invalid public key"))
 	}
 }

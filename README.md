@@ -6,7 +6,7 @@
 - `configs/`: service configuration
 - `docs/`: documentation
 
-## Demo Services (DID-SEP Flow)
+## Demo Services (DID-Registrar Flow)
 
 Local run entrypoint:
 
@@ -17,7 +17,7 @@ $ make dev-up
 This starts:
 
 - DID-Registry
-- DID-SEP
+- DID-Registrar
 - demo-issuer
 - demo-rp
 - demo-client (scenario runner)
@@ -32,9 +32,9 @@ $ docker build -t did-registry -f ./apps/did-registry/Dockerfile .
 $ docker tag did-registry:latest 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-registry:latest
 $ docker push 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-registry:latest
 
-$ docker build -t did-sep -f ./apps/did-sep/Dockerfile .
-$ docker tag did-sep:latest 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-sep:latest
-$ docker push 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-sep:latest
+$ docker build -t did-registrar -f ./apps/did-registrar/Dockerfile .
+$ docker tag did-registrar:latest 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-registrar:latest
+$ docker push 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-registrar:latest
 ```
 
 ### docker run
@@ -48,7 +48,7 @@ $ docker run --rm -d \
 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-registry:latest
 
 $ docker run --rm -d \
---name did-sep \
+--name did-registrar \
 -p 50052:50052 \
-086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-sep:latest
+086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-registrar:latest
 ```

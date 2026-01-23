@@ -13,14 +13,14 @@ dep:
 
 build:
 	go build -o ./apps/did-registry ./apps/did-registry/main.go
-	go build -o ./apps/did-sep ./apps/did-sep/main.go
+	go build -o ./apps/did-registrar ./apps/did-registrar/main.go
 	go build -o ./apps/demo-rp ./apps/demo-rp/main.go
 	go build -o ./apps/demo-issuer ./apps/demo-issuer/main.go
 	go build -o ./apps/demo-client ./apps/demo-client/main.go
 
 docker:
 	docker build -t did-registry_$(DATETIME) -f ./apps/did-registry/Dockerfile .
-	docker build -t did-sep_$(DATETIME) -f ./apps/did-sep/Dockerfile .
+	docker build -t did-registrar_$(DATETIME) -f ./apps/did-registrar/Dockerfile .
 
 proto:
 	protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto-files/*.proto
@@ -154,15 +154,19 @@ docker_build_registry:
 	docker build -t did-registry -f ./apps/did-registry/Dockerfile .
 	docker tag did-registry:latest 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-registry:latest
 docker_build_registrar:
-	docker build -t did-sep -f ./apps/did-sep/Dockerfile .
-	docker tag did-sep:latest 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-sep:latest
+	docker build -t did-registrar -f ./apps/did-registrar/Dockerfile .
+	docker tag did-registrar:latest 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-registrar:latest
 
 # Push to AWS ECR
 docker_push_registry:
 	docker push 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-registry:latest
 docker_push_registrar:
-	docker push 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-sep:latest
+	docker push 086849521175.dkr.ecr.ap-northeast-2.amazonaws.com/did-registrar:latest
 
 .PHONY: dev-up
 dev-up:
 	@./scripts/dev-up.sh
+
+.PHONY: test-summary
+test-summary:
+	@./scripts/test-summary.sh

@@ -4,7 +4,7 @@
 - 패키지 경계 재정비: `did` 라이브러리(암호/문서/드라이버)와 서비스 레이어(Registry/Registrar/Issuer/RP/REST)를 명확히 분리하고, 공용 유틸(`dkms`, `byd50-jwt`)을 모듈화.
 - Config 일원화: `configs/configs.yml`을 서비스별 구조체로 매핑하고, 환경변수 오버라이드/검증 로직을 추가해 배포 환경별 관리.
 - 인터페이스 추상화: Registry 스토리지 인터페이스(put/get/update)와 DID Driver 인터페이스에 컨텍스트·옵션을 추가해 테스트/교체 용이성 확보.
-- 서비스 역할 명확화: DID-SEP는 method 라우팅/정책/검증 경계, DID-Registry는 저장/조회 책임으로 분리한다.
+- 서비스 역할 명확화: DID-Registrar는 method 라우팅/정책/검증 경계, DID-Registry는 저장/조회 책임으로 분리한다.
 
 ## 2) 보안/키 관리
 - 하드코딩 키 제거: `eth.go`의 ECDSA 키 상수, PoC용 랜덤 키 생성 흐름을 내부 KMS/keystore 파일 기반으로 교체.

@@ -50,7 +50,7 @@ rel_service:
   did-registry:
     address: "rel:50051"
     port: ":50051"
-  did-sep:
+  did-registrar:
     address: "rel:50052"
     port: ":50052"
     adopted_driver_list: ["byd50"]
@@ -70,7 +70,7 @@ dev_service:
   did-registry:
     address: "dev:50051"
     port: ":50051"
-  did-sep:
+  did-registrar:
     address: "dev:50052"
     port: ":50052"
     adopted_driver_list: ["byd50"]
@@ -90,7 +90,7 @@ local_service:
   did-registry:
     address: "local:50051"
     port: ":50051"
-  did-sep:
+  did-registrar:
     address: "local:50052"
     port: ":50052"
     adopted_driver_list: ["byd50"]

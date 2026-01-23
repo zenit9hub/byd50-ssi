@@ -2,7 +2,7 @@
 
 ## 전체 개요
 - 목적: SSI(Self-Sovereign Identity) PoC 아키텍처. gRPC 기반으로 DID 발급/해결, VC 발행, VP 검증 플로우를 시연.
-- 핵심 구성: `pkg/did` 라이브러리(암호/문서/드라이버), `did-registry`(저장소), `did-sep`(리졸버), `apps/did_service_endpoint`(REST 게이트웨이), `demo-*` 데모 클라이언트·릴라잉파티·발급자, `apps/geth_client`(체인 연동 예제), `proto-files`(gRPC 스키마).
+- 핵심 구성: `pkg/did` 라이브러리(암호/문서/드라이버), `did-registry`(저장소), `did-registrar`(리졸버), `apps/did_service_endpoint`(REST 게이트웨이), `demo-*` 데모 클라이언트·릴라잉파티·발급자, `apps/geth_client`(체인 연동 예제), `proto-files`(gRPC 스키마).
 
 ## 공용 라이브러리(`did/`)
 - `configs`  
@@ -13,7 +13,7 @@
     - `byd50`: gRPC로 `did-registry`에 DID 생성/해결 요청.  
     - `eth`: BSC 테스트넷 RPC, 배포된 컨트랙트 바인딩(`scdid`), 하드코딩된 ECDSA 키로 트랜잭션 전송 후 DID 생성/해결.  
     - `did_method.go`: 드라이버 등록/조회 인터페이스 정의.  
-  - `rc`: `did-sep` gRPC 클라이언트 싱글턴.  
+  - `rc`: `did-registrar` gRPC 클라이언트 싱글턴.  
   - `dkms`: RSA/ECDSA 키 생성·내보내기(Base58/PEM) 및 DID 연계 관리.  
   - `algorithm`: RSA 기반 암·복호화, 서명/검증, 난수 생성 유틸.  
   - `vc.go` / `vp.go`: VC/VP JWT 생성·검증 래퍼.  
@@ -21,7 +21,7 @@
   - `service`: 향후 REST 서비스용 스텁.  
   - `byd50-jsonld`: 현재 비어 있는 JSON-LD 확장용 위치.
 - `pkg`  
-  - `controller`: DID 생성/해결, 인증 챌린지/리스폰스, SimplePresent/VP 생성·검증을 `did-sep`와 연계해 제공.  
+  - `controller`: DID 생성/해결, 인증 챌린지/리스폰스, SimplePresent/VP 생성·검증을 `did-registrar`와 연계해 제공.  
   - `database`: LevelDB 초기화(파일 경로 `/tmp/foo.db`).  
   - `logger`: 함수 시작/종료 로거.
 - `utility`: RSA 유틸 집합(키 PEM 처리, 암호화/복호화, 서명/검증 등).
@@ -34,7 +34,7 @@
   - `ScUpdateDID`: 존재 여부 확인 후 문서 업데이트(검증 로직 미구현).
 - 구성: `configs.UseConfig.DidRegistryPort`에서 리스닝, 서버 시작/종료 시 DB 열고 닫음.
 
-## DID Registrar 서버(`apps/did-sep/`)
+## DID Registrar 서버(`apps/did-registrar/`)
 - 역할: 메서드별 드라이버 라우팅/추상화. DID 생성/해결 요청을 적합한 드라이버로 위임.
 - 흐름:  
   - `CreateDID`: 요청 메서드(`byd50` 기본값) 기준 드라이버 선택→`CreateDid` 호출.  
@@ -48,7 +48,7 @@
   - `POST /v2/testapi/create-did/`: 메서드·공개키(Base58) 입력으로 DID 생성 후 반환.  
   - `GET /v2/testapi/get-did/:did`: DID Document 조회.  
   - `GET /v2/testapi/get-did-public-key/:did`: DID Document의 공개키 추출.
-- 내부: Gin 서버, `controller`를 통해 `did-sep` 호출.
+- 내부: Gin 서버, `controller`를 통해 `did-registrar` 호출.
 
 ## Demo 데모 세트
 - 공통: `proto-files/relyingparty.proto`·`issuer.proto` 기반 gRPC. PoC 시나리오용 예제 코드.

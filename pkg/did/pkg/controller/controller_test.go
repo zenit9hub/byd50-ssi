@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"byd50-ssi/pkg/did/core"
 	"byd50-ssi/pkg/did/core/dids"
 	"byd50-ssi/pkg/did/kms"
 	pb "byd50-ssi/proto-files"

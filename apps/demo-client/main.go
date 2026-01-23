@@ -25,10 +25,10 @@ import (
 	byd50_jwt "byd50-ssi/pkg/did/core/byd50-jwt"
 	"byd50-ssi/pkg/did/kms"
 	"byd50-ssi/pkg/did/pkg/controller"
-	"byd50-ssi/pkg/did/pkg/logger"
 	pb "byd50-ssi/proto-files"
 	"context"
 	"crypto/ecdsa"
+	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
@@ -49,6 +49,29 @@ var (
 	onceIssRPC   sync.Once
 	issuerClient pb.IssuerClient
 )
+
+func logSectionStart(title string) {
+	log.Printf("\n[%s] START", title)
+}
+
+func logSectionEnd(title string) {
+	log.Printf("[%s] END\n", title)
+}
+
+func logDidDocument(label, doc string) {
+	if doc == "" {
+		log.Printf("\n[%s]\n<empty>", label)
+		return
+	}
+	pretty := doc
+	var payload map[string]interface{}
+	if err := json.Unmarshal([]byte(doc), &payload); err == nil {
+		if buf, err := json.MarshalIndent(payload, "", "  "); err == nil {
+			pretty = string(buf)
+		}
+	}
+	log.Printf("\n[%s]\n%s", label, pretty)
+}
 
 func mustPvKeyECDSA(dkms kms.KMS) *ecdsa.PrivateKey {
 	pvKey, err := dkms.PvKeyECDSA()
@@ -91,8 +114,6 @@ func GetIssuerClient(serviceHost string) pb.IssuerClient {
 }
 
 func UseCase1DefaultAuthentication(dkms kms.KMS) {
-	logger.FuncStart()
-
 	// Set up a connection to the server.
 	relyingPartyClient := GetRelyingPartyClient(configs.UseConfig.RelyingPartyAddress)
 
@@ -104,16 +125,15 @@ func UseCase1DefaultAuthentication(dkms kms.KMS) {
 	2. Recv 'Auth Challenge String'
 	3. decrypt AuthChallenge String
 	*/
-	log.Printf("myKMS.DID = " + dkms.Did())
 	challengeReply, err := relyingPartyClient.AuthChallenge(ctx, &pb.ChallengeRequest{Did: dkms.Did()})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
 	challengeString := challengeReply.GetAuthChallenge()
-	log.Printf("Received Challenge String(%v)", len(challengeString))
+	log.Printf("Challenge received (len=%v)", len(challengeString))
 
 	authResponseString := dkms.Decrypt(challengeString)
-	log.Printf("decrypted string: %s", string(authResponseString))
+	log.Printf("Challenge decrypted")
 
 	/* Use Case 1. Default Authentication
 	4. Send 'Auth Response String'
@@ -123,13 +143,10 @@ func UseCase1DefaultAuthentication(dkms kms.KMS) {
 	if err2 != nil {
 		log.Fatalf("could not greet: %v", err2)
 	}
-	log.Printf("Auth Response result: %s", responseReply.GetMessage())
-	logger.FuncEnd()
+	log.Printf("Auth response: %s", responseReply.GetMessage())
 }
 
 func UseCase2SimpleAuthentication(dkms kms.KMS) {
-	logger.FuncStart()
-
 	// Set up a connection to the server.
 	relyingPartyClient := GetRelyingPartyClient(configs.UseConfig.RelyingPartyAddress)
 
@@ -142,21 +159,16 @@ func UseCase2SimpleAuthentication(dkms kms.KMS) {
 	   signedStr := RsaSign(didAndTime)
 	   challengeString := didAndTime + ";" + signedStr
 	*/
-	log.Printf("myKMS.DID = " + dkms.Did())
-
 	simplePresentString := controller.GetSimplePresent(dkms.Did(), dkms.PvKeyBase58())
 
 	simplePresentReply, err := relyingPartyClient.SimplePresent(ctx, &pb.SimplePresentRequest{SimplePresent: simplePresentString})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
-	log.Printf("Auth Response result: %s", simplePresentReply.GetResult())
-	logger.FuncEnd()
+	log.Printf("Simple present result: %s", simplePresentReply.GetResult())
 }
 
 func UseCase3RequestCredential(dkms kms.KMS) {
-	logger.FuncStart()
-
 	// Set up a connection to the server.
 	issuerClient := GetIssuerClient(configs.UseConfig.IssuerAddress)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -171,7 +183,7 @@ func UseCase3RequestCredential(dkms kms.KMS) {
 	1. JWT
 		credentialsubject
 	*/
-	log.Printf("myKMS.DID = " + dkms.Did())
+	log.Printf("Holder DID: %s", dkms.Did())
 
 	// ******************** Build VC Claims ******************** //
 	nonce := core.RandomString(12)
@@ -214,14 +226,14 @@ func UseCase3RequestCredential(dkms kms.KMS) {
 	kid := dkms.Did()
 	pvKey := mustPvKeyECDSA(dkms)
 	vcRequestJwt := core.CreateVcWithClaims(kid, claims, pvKey)
-	log.Printf(" -- vc request jwt --\n%v", vcRequestJwt)
+	log.Printf("\n[VC Request JWT]\n%v", vcRequestJwt)
 
 	// ******************** Request VC ******************** //
 	credentialReply, err := issuerClient.RequestCredential(ctx, &pb.CredentialRequest{VcClaimJwt: vcRequestJwt})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
-	log.Printf("RequestCredential Response result: %s", credentialReply.GetVcJwt())
+	log.Printf("\n[VC JWT]\n%v", credentialReply.GetVcJwt())
 
 	myVc := credentialReply.GetVcJwt()
 
@@ -265,14 +277,12 @@ func UseCase3RequestCredential(dkms kms.KMS) {
 	holderDid := dkms.Did()
 	holderPvKey := mustPvKeyECDSA(dkms)
 	myVp := core.CreateVpWithClaims(holderDid, vpClaims, holderPvKey)
-	log.Printf("myVp: %v", myVp)
+	log.Printf("\n[VP JWT]\n%v", myVp)
 
 	// ******************** Send VP ******************** //
 	VpReply, err := relyingPartyClient.VerifyVp(ctxRp, &pb.VerifyVpRequest{Vp: myVp})
 
-	log.Printf("result: %v", VpReply.GetResult())
-
-	logger.FuncEnd()
+	log.Printf("VP verify result: %v", VpReply.GetResult())
 }
 
 func geth() {
@@ -318,28 +328,36 @@ func geth() {
 }
 
 func main() {
-	// Initialize KMS
-	myKMS, err := kms.InitKMS(kms.KeyTypeRSA)
+	// Auth flows use RSA; VC/VP flows use ECDSA.
+	authKMS, err := kms.InitKMS(kms.KeyTypeRSA)
 	if err != nil {
 		log.Fatalf("could not Init KMS (%v)", err.Error())
 	}
 
-	// Create DID
 	method := "byd50"
-	did := controller.CreateDID(myKMS.PbKeyBase58(), method)
-	myKMS.SetDid(did)
+	authDid := controller.CreateDID(authKMS.PbKeyBase58(), method)
+	authKMS.SetDid(authDid)
+	log.Printf("\n[Auth DID]\n%s", authDid)
+	authDidDoc := controller.ResolveDID(authDid)
+	logDidDocument("DID Document (Auth)", authDidDoc)
 
-	// Use Case 1. Default Authentication
-	UseCase1DefaultAuthentication(myKMS)
+	logSectionStart("DID Auth Challenge & Response")
+	UseCase1DefaultAuthentication(authKMS)
+	logSectionEnd("DID Auth Challenge & Response")
 
-	// Use Case 2. Simple Authentication
-	UseCase2SimpleAuthentication(myKMS)
+	logSectionStart("DID Simple Presentation")
+	UseCase2SimpleAuthentication(authKMS)
+	logSectionEnd("DID Simple Presentation")
 
-	// Use Case 3. Simple Authentication
-	// Initialize KMS
-	myKMS, err = kms.InitKMS(kms.KeyTypeECDSA)
-	// Create DID
-	did = controller.CreateDID(myKMS.PbKeyBase58(), method)
-	myKMS.SetDid(did)
-	UseCase3RequestCredential(myKMS)
+	credKMS, err := kms.InitKMS(kms.KeyTypeECDSA)
+	if err != nil {
+		log.Fatalf("could not Init KMS (%v)", err.Error())
+	}
+	credDid := controller.CreateDID(credKMS.PbKeyBase58(), method)
+	credKMS.SetDid(credDid)
+	log.Printf("\n[Credential DID]\n%s", credDid)
+
+	logSectionStart("VC Issue & VP Submit")
+	UseCase3RequestCredential(credKMS)
+	logSectionEnd("VC Issue & VP Submit")
 }

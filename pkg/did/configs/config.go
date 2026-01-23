@@ -18,7 +18,7 @@ type DidConfig struct {
 			Address           string   `yaml:"address"`
 			Port              string   `yaml:"port"`
 			AdoptedDriverList []string `yaml:"adopted_driver_list"`
-		} `yaml:"did-sep"`
+		} `yaml:"did-registrar"`
 		ServiceEndpoint struct {
 			Address string `yaml:"address"`
 			Port    string `yaml:"port"`
@@ -45,7 +45,7 @@ type DidConfig struct {
 			Address           string   `yaml:"address"`
 			Port              string   `yaml:"port"`
 			AdoptedDriverList []string `yaml:"adopted_driver_list"`
-		} `yaml:"did-sep"`
+		} `yaml:"did-registrar"`
 		ServiceEndpoint struct {
 			Address string `yaml:"address"`
 			Port    string `yaml:"port"`
@@ -72,7 +72,7 @@ type DidConfig struct {
 			Address           string   `yaml:"address"`
 			Port              string   `yaml:"port"`
 			AdoptedDriverList []string `yaml:"adopted_driver_list"`
-		} `yaml:"did-sep"`
+		} `yaml:"did-registrar"`
 		ServiceEndpoint struct {
 			Address string `yaml:"address"`
 			Port    string `yaml:"port"`

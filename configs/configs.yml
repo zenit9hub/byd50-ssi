@@ -16,7 +16,7 @@ rel_service:
     # port
     port: :50051
   # did registrar
-  did-sep:
+  did-registrar:
     # address
     address: localhost:50052
     # port
@@ -55,7 +55,7 @@ dev_service:
     # port
     port: :50051
   # did registrar
-  did-sep:
+  did-registrar:
     # address
     address: localhost:50052
     # port
@@ -94,7 +94,7 @@ local_service:
     # port
     port: :50051
   # did registrar
-  did-sep:
+  did-registrar:
     # address
     address: localhost:50052
     # port
