@@ -1,0 +1,1 @@
+/Users/ryan9kim/kiot-worksoc/byd50-ssi/android/app/build/intermediates/cxx/Debug/6siu2q2q/obj/armeabi-v7a

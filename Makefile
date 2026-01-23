@@ -1,6 +1,6 @@
 DATETIME=$(shell date +"%m%d-%H%M" | tr ' :' '__')
 
-ANDROID_OUT=../android/app/src/main/jniLibs
+ANDROID_OUT=./android/app/src/main/jniLibs
 ANDROID_SDK=/Users/ryan9kim/Library/Android/sdk
 NDK_BIN=/Users/ryan9kim/Library/Android/sdk/ndk/27.0.12077973/toolchains/llvm/prebuilt/darwin-x86_64/bin
 
@@ -72,28 +72,32 @@ android-armv7a:
 	GOARCH=arm \
 	GOARM=7 \
 	CC=$(NDK_BIN)/armv7a-linux-androideabi21-clang \
-	go build -buildmode=c-shared -o $(ANDROID_OUT)/armeabi-v7a/libfoo.so ./did/c-shared/libfoo
+	CGO_LDFLAGS="-Wl,-soname,libfoo.so" \
+	go build -buildmode=c-shared -o $(ANDROID_OUT)/armeabi-v7a/libfoo.so ./pkg/did/c-shared/libfoo
 
 android-arm64:
 	CGO_ENABLED=1 \
 	GOOS=android \
 	GOARCH=arm64 \
 	CC=$(NDK_BIN)/aarch64-linux-android21-clang \
-	go build -buildmode=c-shared -o $(ANDROID_OUT)/arm64-v8a/libfoo.so ./did/c-shared/libfoo
+	CGO_LDFLAGS="-Wl,-soname,libfoo.so" \
+	go build -buildmode=c-shared -o $(ANDROID_OUT)/arm64-v8a/libfoo.so ./pkg/did/c-shared/libfoo
 
 android-x86:
 	CGO_ENABLED=1 \
 	GOOS=android \
 	GOARCH=386 \
 	CC=$(NDK_BIN)/i686-linux-android21-clang \
-	go build -buildmode=c-shared -o $(ANDROID_OUT)/x86/libfoo.so ./did/c-shared/libfoo
+	CGO_LDFLAGS="-Wl,-soname,libfoo.so" \
+	go build -buildmode=c-shared -o $(ANDROID_OUT)/x86/libfoo.so ./pkg/did/c-shared/libfoo
 
 android-x86_64:
 	CGO_ENABLED=1 \
 	GOOS=android \
 	GOARCH=amd64 \
 	CC=$(NDK_BIN)/x86_64-linux-android21-clang \
-	go build -buildmode=c-shared -o $(ANDROID_OUT)/x86_64/libfoo.so ./did/c-shared/libfoo
+	CGO_LDFLAGS="-Wl,-soname,libfoo.so" \
+	go build -buildmode=c-shared -o $(ANDROID_OUT)/x86_64/libfoo.so ./pkg/did/c-shared/libfoo
 
 
 ps_android-armv7a:
@@ -104,7 +108,8 @@ ps_android-armv7a:
 	$$env:GOOS='android'; \
 	$$env:GOARCH='arm'; \
 	$$env:CC=$$env:NDK_BIN + '/armv7a-linux-androideabi21-clang'; \
-	go build -buildmode=c-shared -o $(ANDROID_OUT)/armeabi-v7a/libfoo.so ./did/c-shared/libfoo"
+	$$env:CGO_LDFLAGS='-Wl,-soname,libfoo.so'; \
+	go build -buildmode=c-shared -o $(ANDROID_OUT)/armeabi-v7a/libfoo.so ./pkg/did/c-shared/libfoo"
 
 ps_android-arm64:
 	@echo "Building for android-arm64..."
@@ -114,7 +119,8 @@ ps_android-arm64:
 	$$env:GOOS='android'; \
 	$$env:GOARCH='arm64'; \
 	$$env:CC=$$env:NDK_BIN + '/aarch64-linux-android21-clang'; \
-	go build -buildmode=c-shared -o $(ANDROID_OUT)/arm64-v8a/libfoo.so ./did/c-shared/libfoo"
+	$$env:CGO_LDFLAGS='-Wl,-soname,libfoo.so'; \
+	go build -buildmode=c-shared -o $(ANDROID_OUT)/arm64-v8a/libfoo.so ./pkg/did/c-shared/libfoo"
 
 ps_android-x86:
 	@echo "Building for android-386..."
@@ -124,7 +130,8 @@ ps_android-x86:
 	$$env:GOOS='android'; \
 	$$env:GOARCH='386'; \
 	$$env:CC=$$env:NDK_BIN + '/i686-linux-android21-clang'; \
-	go build -buildmode=c-shared -o $(ANDROID_OUT)/x86/libfoo.so ./did/c-shared/libfoo"
+	$$env:CGO_LDFLAGS='-Wl,-soname,libfoo.so'; \
+	go build -buildmode=c-shared -o $(ANDROID_OUT)/x86/libfoo.so ./pkg/did/c-shared/libfoo"
 
 ps_android-x86_64:
 	@echo "Building for android-amd64..."
@@ -134,7 +141,8 @@ ps_android-x86_64:
 	$$env:GOOS='android'; \
 	$$env:GOARCH='amd64'; \
 	$$env:CC=$$env:NDK_BIN + '/x86_64-linux-android21-clang'; \
-	go build -buildmode=c-shared -o $(ANDROID_OUT)/x86_64/libfoo.so ./did/c-shared/libfoo"
+	$$env:CGO_LDFLAGS='-Wl,-soname,libfoo.so'; \
+	go build -buildmode=c-shared -o $(ANDROID_OUT)/x86_64/libfoo.so ./pkg/did/c-shared/libfoo"
 
 android: android-armv7a android-arm64 android-x86 android-x86_64
 

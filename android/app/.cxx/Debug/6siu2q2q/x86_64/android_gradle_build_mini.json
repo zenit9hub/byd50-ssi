@@ -1,0 +1,29 @@
+{
+  "buildFiles": [
+    "/Users/ryan9kim/kiot-worksoc/byd50-ssi/android/app/src/main/cpp/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/ryan9kim/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/ryan9kim/kiot-worksoc/byd50-ssi/android/app/.cxx/Debug/6siu2q2q/x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/ryan9kim/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/ryan9kim/kiot-worksoc/byd50-ssi/android/app/.cxx/Debug/6siu2q2q/x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "native-bridge::@6890427a1f51a3e7e1df": {
+      "artifactName": "native-bridge",
+      "abi": "x86_64",
+      "output": "/Users/ryan9kim/kiot-worksoc/byd50-ssi/android/app/build/intermediates/cxx/Debug/6siu2q2q/obj/x86_64/libnative-bridge.so",
+      "runtimeFiles": [
+        "/Users/ryan9kim/kiot-worksoc/byd50-ssi/android/app/src/main/jniLibs/x86_64/libfoo.so"
+      ]
+    }
+  }
+}

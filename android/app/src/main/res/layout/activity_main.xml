@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/txtTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="BYD50 SSI Demo"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Base URL (emulator: 10.0.2.2)" />
+
+    <EditText
+        android:id="@+id/inputBaseUrl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textUri" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="시나리오 순서대로 실행" />
+
+    <Button
+        android:id="@+id/btnCreateDid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="1. DID 발급" />
+
+    <Button
+        android:id="@+id/btnIssueId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="2. 전자주민증 VC 발급" />
+
+    <Button
+        android:id="@+id/btnIssueDl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="3. 전자면허증 VC 발급" />
+
+    <Button
+        android:id="@+id/btnIssueRental"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="4. 렌터카 계약 VC 발급" />
+
+    <Button
+        android:id="@+id/btnCarAccess"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="5. 차량 접근 테스트" />
+
+    <Button
+        android:id="@+id/btnShowKeys"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="JNI: PublicKey 조회" />
+
+    <Button
+        android:id="@+id/btnClear"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="로그 지우기" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="\nLog" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/txtLog"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12sp" />
+    </ScrollView>
+</LinearLayout>

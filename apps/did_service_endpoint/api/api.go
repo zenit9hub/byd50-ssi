@@ -9,7 +9,9 @@ import (
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -97,6 +99,11 @@ func parseEcPrivateKeyBase58(pvKeyBase58 string) (*ecdsa.PrivateKey, error) {
 	return x509.ParseECPrivateKey(keyBytes)
 }
 
+func logReq(c *gin.Context, action string, fields map[string]string) {
+	log.Printf("[did_service_endpoint][%s] %s %s ip=%s fields=%v",
+		action, c.Request.Method, c.Request.URL.Path, c.ClientIP(), fields)
+}
+
 // CreateDid
 // @Summary Create DID
 // @Description Create a DID using method and public key.
@@ -112,6 +119,7 @@ func parseEcPrivateKeyBase58(pvKeyBase58 string) (*ecdsa.PrivateKey, error) {
 func CreateDid(c *gin.Context) {
 	var requestBody CreateDidRequestBody
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
+		logReq(c, "CreateDid.BadRequest", map[string]string{"error": "invalid json"})
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_PARAM",
 			Message: "invalid json body",
@@ -120,18 +128,25 @@ func CreateDid(c *gin.Context) {
 	}
 	pbKeyBase58 := requestBody.PublicKeyBase58
 	method := requestBody.Method
+	logReq(c, "CreateDid.Request", map[string]string{
+		"method": method,
+		"hasKey": strconv.FormatBool(pbKeyBase58 != ""),
+	})
 	if method != "" && pbKeyBase58 != "" {
 		did := controller.CreateDID(pbKeyBase58, method)
 		if did != "" {
+			logReq(c, "CreateDid.Success", map[string]string{"did": did})
 			c.JSON(http.StatusOK, CreateDidResponse{Did: did})
 			return
 		}
+		logReq(c, "CreateDid.Error", map[string]string{"error": "create did failed"})
 		c.JSON(http.StatusInternalServerError, ErrorResponse{
 			Code:    "INTERNAL_ERROR",
 			Message: "failed to create did",
 		})
 		return
 	}
+	logReq(c, "CreateDid.BadRequest", map[string]string{"error": "missing method or public_key_base58"})
 	c.JSON(http.StatusBadRequest, ErrorResponse{
 		Code:    "INVALID_PARAM",
 		Message: "method and public_key_base58 are required",
@@ -153,6 +168,7 @@ func CreateDid(c *gin.Context) {
 // @Router /testapi/get-did/{some_id} [get]
 func GetDid(c *gin.Context) {
 	did := c.Params.ByName("some_id")
+	logReq(c, "GetDid.Request", map[string]string{"did": did})
 	if did == "" {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_PARAM",
@@ -162,9 +178,11 @@ func GetDid(c *gin.Context) {
 	}
 	document := controller.ResolveDID(did)
 	if document != "" {
+		logReq(c, "GetDid.Success", map[string]string{"did": did})
 		c.JSON(http.StatusOK, GetDidResponse{Document: document})
 		return
 	}
+	logReq(c, "GetDid.NotFound", map[string]string{"did": did})
 	c.JSON(http.StatusNotFound, ErrorResponse{
 		Code:    "NOT_FOUND",
 		Message: "did document not found",
@@ -185,6 +203,7 @@ func GetDid(c *gin.Context) {
 // @Router /testapi/get-did-public-key/{some_id} [get]
 func GetDidPublicKey(c *gin.Context) {
 	did := c.Params.ByName("some_id")
+	logReq(c, "GetDidPublicKey.Request", map[string]string{"did": did})
 	if did == "" {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_PARAM",
@@ -194,9 +213,11 @@ func GetDidPublicKey(c *gin.Context) {
 	}
 	publicKeyBase58 := controller.GetPublicKey(did, "")
 	if publicKeyBase58 != "" {
+		logReq(c, "GetDidPublicKey.Success", map[string]string{"did": did})
 		c.JSON(http.StatusOK, GetDidPublicKeyResponse{PublicKeyBase58: publicKeyBase58})
 		return
 	}
+	logReq(c, "GetDidPublicKey.NotFound", map[string]string{"did": did})
 	c.JSON(http.StatusNotFound, ErrorResponse{
 		Code:    "NOT_FOUND",
 		Message: "public key not found",
@@ -218,13 +239,20 @@ func GetDidPublicKey(c *gin.Context) {
 func CreateVc(c *gin.Context) {
 	var requestBody CreateVcRequestBody
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
+		logReq(c, "CreateVc.BadRequest", map[string]string{"error": "invalid json"})
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_PARAM",
 			Message: "invalid json body",
 		})
 		return
 	}
+	logReq(c, "CreateVc.Request", map[string]string{
+		"kid":     requestBody.Kid,
+		"type":    requestBody.Type,
+		"subject": requestBody.Subject,
+	})
 	if requestBody.Kid == "" || requestBody.PvKeyBase58 == "" || requestBody.CredentialSubject == nil {
+		logReq(c, "CreateVc.BadRequest", map[string]string{"error": "missing required fields"})
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_PARAM",
 			Message: "kid, pv_key_base58, and credential_subject are required",
@@ -233,6 +261,7 @@ func CreateVc(c *gin.Context) {
 	}
 	pvKey, err := parseEcPrivateKeyBase58(requestBody.PvKeyBase58)
 	if err != nil {
+		logReq(c, "CreateVc.BadRequest", map[string]string{"error": "invalid pv_key_base58"})
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_PARAM",
 			Message: "invalid pv_key_base58",
@@ -263,12 +292,14 @@ func CreateVc(c *gin.Context) {
 	}
 	vcJwt := core.CreateVcWithClaims(requestBody.Kid, vcClaims, pvKey)
 	if vcJwt == "" {
+		logReq(c, "CreateVc.Error", map[string]string{"error": "create vc failed"})
 		c.JSON(http.StatusInternalServerError, ErrorResponse{
 			Code:    "INTERNAL_ERROR",
 			Message: "failed to create vc",
 		})
 		return
 	}
+	logReq(c, "CreateVc.Success", map[string]string{"vc_len": strconv.Itoa(len(vcJwt))})
 	c.JSON(http.StatusOK, CreateVcResponse{VcJwt: vcJwt})
 }
 
@@ -286,6 +317,7 @@ func CreateVc(c *gin.Context) {
 func VerifyVc(c *gin.Context) {
 	var requestBody VerifyVcRequestBody
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
+		logReq(c, "VerifyVc.BadRequest", map[string]string{"error": "invalid json"})
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_PARAM",
 			Message: "invalid json body",
@@ -293,17 +325,21 @@ func VerifyVc(c *gin.Context) {
 		return
 	}
 	if requestBody.VcJwt == "" {
+		logReq(c, "VerifyVc.BadRequest", map[string]string{"error": "vc_jwt is required"})
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_PARAM",
 			Message: "vc_jwt is required",
 		})
 		return
 	}
+	logReq(c, "VerifyVc.Request", map[string]string{"vc_len": strconv.Itoa(len(requestBody.VcJwt))})
 	ok, err := core.VerifyVc(requestBody.VcJwt, controller.GetPublicKey)
 	if err != nil {
+		logReq(c, "VerifyVc.Result", map[string]string{"valid": "false", "error": err.Error()})
 		c.JSON(http.StatusOK, VerifyResponse{Valid: false, Error: err.Error()})
 		return
 	}
+	logReq(c, "VerifyVc.Result", map[string]string{"valid": strconv.FormatBool(ok)})
 	c.JSON(http.StatusOK, VerifyResponse{Valid: ok})
 }
 
@@ -322,6 +358,7 @@ func VerifyVc(c *gin.Context) {
 func CreateVp(c *gin.Context) {
 	var requestBody CreateVpRequestBody
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
+		logReq(c, "CreateVp.BadRequest", map[string]string{"error": "invalid json"})
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_PARAM",
 			Message: "invalid json body",
@@ -329,6 +366,7 @@ func CreateVp(c *gin.Context) {
 		return
 	}
 	if requestBody.HolderDid == "" || requestBody.PvKeyBase58 == "" || len(requestBody.VcJwts) == 0 {
+		logReq(c, "CreateVp.BadRequest", map[string]string{"error": "missing required fields"})
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_PARAM",
 			Message: "holder_did, pv_key_base58, and vc_jwts are required",
@@ -337,6 +375,7 @@ func CreateVp(c *gin.Context) {
 	}
 	pvKey, err := parseEcPrivateKeyBase58(requestBody.PvKeyBase58)
 	if err != nil {
+		logReq(c, "CreateVp.BadRequest", map[string]string{"error": "invalid pv_key_base58"})
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_PARAM",
 			Message: "invalid pv_key_base58",
@@ -350,12 +389,14 @@ func CreateVp(c *gin.Context) {
 	stdClaims := standardClaims(issuer, requestBody.Subject, requestBody.ExpiresInMinutes)
 	vpJwt := core.CreateVp(requestBody.HolderDid, requestBody.Type, requestBody.VcJwts, stdClaims, pvKey)
 	if vpJwt == "" {
+		logReq(c, "CreateVp.Error", map[string]string{"error": "create vp failed"})
 		c.JSON(http.StatusInternalServerError, ErrorResponse{
 			Code:    "INTERNAL_ERROR",
 			Message: "failed to create vp",
 		})
 		return
 	}
+	logReq(c, "CreateVp.Success", map[string]string{"vp_len": strconv.Itoa(len(vpJwt))})
 	c.JSON(http.StatusOK, CreateVpResponse{VpJwt: vpJwt})
 }
 
@@ -373,6 +414,7 @@ func CreateVp(c *gin.Context) {
 func VerifyVp(c *gin.Context) {
 	var requestBody VerifyVpRequestBody
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
+		logReq(c, "VerifyVp.BadRequest", map[string]string{"error": "invalid json"})
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_PARAM",
 			Message: "invalid json body",
@@ -380,16 +422,20 @@ func VerifyVp(c *gin.Context) {
 		return
 	}
 	if requestBody.VpJwt == "" {
+		logReq(c, "VerifyVp.BadRequest", map[string]string{"error": "vp_jwt is required"})
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_PARAM",
 			Message: "vp_jwt is required",
 		})
 		return
 	}
+	logReq(c, "VerifyVp.Request", map[string]string{"vp_len": strconv.Itoa(len(requestBody.VpJwt))})
 	ok, _, err := core.VerifyVp(requestBody.VpJwt, controller.GetPublicKey)
 	if err != nil {
+		logReq(c, "VerifyVp.Result", map[string]string{"valid": "false", "error": err.Error()})
 		c.JSON(http.StatusOK, VerifyResponse{Valid: false, Error: err.Error()})
 		return
 	}
+	logReq(c, "VerifyVp.Result", map[string]string{"valid": strconv.FormatBool(ok)})
 	c.JSON(http.StatusOK, VerifyResponse{Valid: ok})
 }

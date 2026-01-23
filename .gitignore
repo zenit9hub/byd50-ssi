@@ -20,3 +20,8 @@ apps/demo-issuer/main.exe
 apps/demo-rp/main
 apps/demo-rp/main.exe
 *.exe
+android/.gradle/
+android/local.properties
+android/.idea/
+android/app/build/
+android/build/

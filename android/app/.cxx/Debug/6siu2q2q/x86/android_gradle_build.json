@@ -1,0 +1,40 @@
+{
+  "buildFiles": [
+    "/Users/ryan9kim/kiot-worksoc/byd50-ssi/android/app/src/main/cpp/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/ryan9kim/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/ryan9kim/kiot-worksoc/byd50-ssi/android/app/.cxx/Debug/6siu2q2q/x86",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/ryan9kim/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/ryan9kim/kiot-worksoc/byd50-ssi/android/app/.cxx/Debug/6siu2q2q/x86",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "native-bridge::@6890427a1f51a3e7e1df": {
+      "toolchain": "toolchain",
+      "abi": "x86",
+      "artifactName": "native-bridge",
+      "output": "/Users/ryan9kim/kiot-worksoc/byd50-ssi/android/app/build/intermediates/cxx/Debug/6siu2q2q/obj/x86/libnative-bridge.so",
+      "runtimeFiles": [
+        "/Users/ryan9kim/kiot-worksoc/byd50-ssi/android/app/src/main/jniLibs/x86/libfoo.so"
+      ]
+    }
+  },
+  "toolchains": {
+    "toolchain": {
+      "cCompilerExecutable": "/Users/ryan9kim/Library/Android/sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang.lld",
+      "cppCompilerExecutable": "/Users/ryan9kim/Library/Android/sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++.lld"
+    }
+  },
+  "cFileExtensions": [],
+  "cppFileExtensions": [
+    "cpp"
+  ]
+}

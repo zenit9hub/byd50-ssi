@@ -1,0 +1,7 @@
+# ninja log v5
+0	37	1769186853871207544	build.ninja	ab83917e81ab02d3
+1	195	1769186489950174550	CMakeFiles/native-bridge.dir/native_bridge.cpp.o	461b00372728b938
+0	7	0	clean	8312fd8a3e438231
+195	297	1769186490052881319	/Users/ryan9kim/kiot-worksoc/byd50-ssi/android/app/build/intermediates/cxx/Debug/6siu2q2q/obj/x86_64/libnative-bridge.so	80b169d33c109f8a
+1	274	1769186854171865328	CMakeFiles/native-bridge.dir/native_bridge.cpp.o	461b00372728b938
+275	345	1769186854239689658	/Users/ryan9kim/kiot-worksoc/byd50-ssi/android/app/build/intermediates/cxx/Debug/6siu2q2q/obj/x86_64/libnative-bridge.so	80b169d33c109f8a
