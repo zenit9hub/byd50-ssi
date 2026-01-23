@@ -14,63 +14,53 @@
 
 syntax = "proto3";
 
-option go_package = "google.golang.org/grpc/examples/proto-files/proto-files";
+option go_package = "byd50-ssi/proto-files";
 option java_multiple_files = true;
 option java_package = "io.grpc.examples.proto-files";
 option java_outer_classname = "HelloWorldProto";
 
 package registrar;
 
-// The greeting service definition.
 service Registrar {
-  // Sends a request to generate DIDs.
-  rpc createDID (CreateDIDsRequest) returns (CreateDIDsReply) {}
-  rpc registerDID (RegisterDIDsRequest) returns (RegisterDIDsReply) {}
-  rpc resolveDID (ResolveDIDsRequest) returns (ResolveDIDsReply) {}
-  rpc updateDID (updateDIDsRequest) returns (updateDIDsReply) {}
+  rpc CreateDid (CreateDidRequest) returns (CreateDidResponse) {}
+  rpc RegisterDid (RegisterDidRequest) returns (RegisterDidResponse) {}
+  rpc ResolveDid (ResolveDidRequest) returns (ResolveDidResponse) {}
+  rpc UpdateDid (UpdateDidRequest) returns (UpdateDidResponse) {}
 }
 
-// The request message containing the publicKey.
-message CreateDIDsRequest {
-  string publicKeyBase58 = 1;
+message CreateDidRequest {
+  string public_key_base58 = 1;
   string method = 2;
 }
 
-// The response message containing the created DID.
-message CreateDIDsReply {
+message CreateDidResponse {
   string did = 1;
 }
 
-// The request message containing the publicKey.
-message RegisterDIDsRequest {
+message RegisterDidRequest {
   string did = 1;
   string document = 2;
 }
 
-// The response message containing the created DID.
-message RegisterDIDsReply {
+message RegisterDidResponse {
   string result = 1;
 }
 
-// The request message containing the DID.
-message ResolveDIDsRequest {
+message ResolveDidRequest {
   string did = 1;
 }
 
-// The response message containing the DID document.
-message ResolveDIDsReply {
-  string resolutionError = 1;
-  string didDocument = 2;
-  string didDocumentMetadata = 3;
+message ResolveDidResponse {
+  string resolution_error = 1;
+  string did_document = 2;
+  string did_document_metadata = 3;
 }
 
-// The request message containing the DID & document.
-message updateDIDsRequest {
+message UpdateDidRequest {
   string did = 1;
   string document = 2;
 }
 
-// The response message containing the result.
-message updateDIDsReply {
+message UpdateDidResponse {
   string result = 1;
 }

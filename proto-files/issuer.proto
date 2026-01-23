@@ -14,16 +14,14 @@
 
 syntax = "proto3";
 
-option go_package = "google.golang.org/grpc/examples/proto-files/proto-files";
+option go_package = "byd50-ssi/proto-files";
 option java_multiple_files = true;
 option java_package = "io.grpc.examples.proto-files";
 option java_outer_classname = "HelloWorldProto";
 
 package issuer;
 
-// The greeting service definition.
 service Issuer {
-  // Sends a greeting
   rpc RequestCredential (CredentialRequest) returns (CredentialReply) {}
   rpc ReqCredIdCard (IdCardRequest) returns (IdCardReply) {}
   rpc ReqCredDlCard (DlCardRequest) returns (DlCardReply) {}
@@ -31,56 +29,46 @@ service Issuer {
   rpc RentalCarControl (RentalCarControlRequest) returns (RentalCarControlReply) {}
 }
 
-// The request message containing the vcClaimJwt.
 message CredentialRequest {
-  string vcClaimJwt = 1;
+  string vc_claim_jwt = 1;
 }
 
-// The response message containing the vcJwt
 message CredentialReply {
-  string vcJwt = 1;
+  string vc_jwt = 1;
 }
 
-// The request message containing the did.
 message IdCardRequest {
   string did = 1;
 }
 
-// The response message containing the eIdVcJwt
 message IdCardReply {
-  string eIdVcJwt = 1;
+  string eid_vc_jwt = 1;
 }
 
-// The request message containing the eIdVcJwt.
 message DlCardRequest {
-  string eIdVcJwt = 1;
+  string eid_vc_jwt = 1;
 }
 
-// The response message containing the driver's license
 message DlCardReply {
   bool valid = 1;
   string result = 2;
-  string eDlVcJwt = 3;
+  string edl_vc_jwt = 3;
 }
 
-// The request message containing the driver's license.
 message RentalCarAgreementRequest {
-  string eDlVcJwt = 1;
+  string edl_vc_jwt = 1;
 }
 
-// The response message containing the rentalCarVcJwt
 message RentalCarAgreementReply {
   bool valid = 1;
   string result = 2;
-  string rentalCarAgreementVcJwt = 3;
+  string rental_car_agreement_vc_jwt = 3;
 }
 
-// The request message containing the rentalCarVcJwt.
 message RentalCarControlRequest {
-  string rentalCarAgreementVcJwt = 1;
+  string rental_car_agreement_vc_jwt = 1;
 }
 
-// The response message containing the result
 message RentalCarControlReply {
   bool valid = 1;
   string result = 2;

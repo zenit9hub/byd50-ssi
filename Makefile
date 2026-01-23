@@ -23,7 +23,7 @@ docker:
 	docker build -t did-registrar_$(DATETIME) -f ./apps/did-registrar/Dockerfile .
 
 proto:
-	protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto-files/*.proto
+	@PATH="$(shell go env GOPATH)/bin:$$PATH" protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto-files/*.proto
 
 coverage:
 	go test ./pkg/did/core/ -coverprofile="coverage.out"

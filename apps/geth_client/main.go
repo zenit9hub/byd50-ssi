@@ -1,3 +1,6 @@
+//go:build geth
+// +build geth
+
 package main
 
 import (

@@ -46,7 +46,7 @@ func (m *DidMethodBYD50) ResolveDid(did string) (string, string, string, error) 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	r, err := registryClient.ScResolveDID(ctx, &pb.ScResolveDIDsRequest{Did: did})
+	r, err := registryClient.ResolveDid(ctx, &pb.RegistryResolveDidRequest{Did: did})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
@@ -68,7 +68,7 @@ func (m *DidMethodBYD50) CreateDid(pbKeyBase58 string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	r, err := registryClient.ScCreateDID(ctx, &pb.ScCreateDIDsRequest{PublicKey: pbKeyBase58})
+	r, err := registryClient.CreateDid(ctx, &pb.RegistryCreateDidRequest{PublicKey: pbKeyBase58})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}

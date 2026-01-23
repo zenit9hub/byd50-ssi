@@ -40,8 +40,8 @@ type server struct {
 }
 
 // CreateDID implements proto-files.RegistrarServer
-func (s *server) CreateDID(ctx context.Context, in *pb.CreateDIDsRequest) (*pb.CreateDIDsReply, error) {
-	log.Printf("[CreateDID] req ~> ScCreateDID")
+func (s *server) CreateDid(ctx context.Context, in *pb.CreateDidRequest) (*pb.CreateDidResponse, error) {
+	log.Printf("[CreateDid] req ~> CreateDid")
 
 	// Contact the server and print out its response.
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -64,12 +64,12 @@ func (s *server) CreateDID(ctx context.Context, in *pb.CreateDIDsRequest) (*pb.C
 	did, _ := driver.GetDidMethod(methodStr).CreateDid(pbKey)
 	log.Printf("[CreateDID] reply <~ %v", did)
 
-	return &pb.CreateDIDsReply{Did: did}, nil
+	return &pb.CreateDidResponse{Did: did}, nil
 }
 
 // ResolveDID implements proto-files.RegistrarServer
-func (s *server) ResolveDID(ctx context.Context, in *pb.ResolveDIDsRequest) (*pb.ResolveDIDsReply, error) {
-	log.Printf("[ResolveDID] Received DID: %v", in.GetDid())
+func (s *server) ResolveDid(ctx context.Context, in *pb.ResolveDidRequest) (*pb.ResolveDidResponse, error) {
+	log.Printf("[ResolveDid] Received DID: %v", in.GetDid())
 
 	// Contact the server and print out its response.
 	dID := in.GetDid()
@@ -94,14 +94,14 @@ func (s *server) ResolveDID(ctx context.Context, in *pb.ResolveDIDsRequest) (*pb
 		// error handling..
 	}
 
-	return &pb.ResolveDIDsReply{DidDocument: didDocument, DidDocumentMetadata: didDocumentMetadata, ResolutionError: resolutionError}, nil
+	return &pb.ResolveDidResponse{DidDocument: didDocument, DidDocumentMetadata: didDocumentMetadata, ResolutionError: resolutionError}, nil
 }
 
 // UpdateDID implements proto-files.RegistrarServer
-func (s *server) UpdateDID(ctx context.Context, in *pb.UpdateDIDsRequest) (*pb.UpdateDIDsReply, error) {
-	log.Printf("[UpdateDID] Received DID: %v", in.GetDid())
+func (s *server) UpdateDid(ctx context.Context, in *pb.UpdateDidRequest) (*pb.UpdateDidResponse, error) {
+	log.Printf("[UpdateDid] Received DID: %v", in.GetDid())
 
-	return &pb.UpdateDIDsReply{Result: ""}, nil
+	return &pb.UpdateDidResponse{Result: ""}, nil
 }
 
 func main() {

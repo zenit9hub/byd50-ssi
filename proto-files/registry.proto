@@ -14,63 +14,52 @@
 
 syntax = "proto3";
 
-option go_package = "google.golang.org/grpc/examples/proto-files/proto-files";
+option go_package = "byd50-ssi/proto-files";
 option java_multiple_files = true;
 option java_package = "io.grpc.examples.proto-files";
 option java_outer_classname = "HelloWorldProto";
 
 package registry;
 
-// The greeting service definition.
 service Registry {
-  // Sends a request to generate DIDs.
-  rpc scCreateDID (scCreateDIDsRequest) returns (scCreateDIDsReply) {}
-  // TBD
-  //rpc scRegisterDID (scRegisterDIDsRequest) returns (scRegisterDIDsReply) {}
-  rpc scResolveDID (scResolveDIDsRequest) returns (scResolveDIDsReply) {}
-  rpc scUpdateDID (scUpdateDIDsRequest) returns (scUpdateDIDsReply) {}
+  rpc CreateDid (RegistryCreateDidRequest) returns (RegistryCreateDidResponse) {}
+  //rpc RegisterDid (RegistryRegisterDidRequest) returns (RegistryRegisterDidResponse) {}
+  rpc ResolveDid (RegistryResolveDidRequest) returns (RegistryResolveDidResponse) {}
+  rpc UpdateDid (RegistryUpdateDidRequest) returns (RegistryUpdateDidResponse) {}
 }
 
-// The request message containing the publicKey.
-message scCreateDIDsRequest {
-  string publicKey = 1;
+message RegistryCreateDidRequest {
+  string public_key = 1;
 }
 
-// The response message containing the created DID.
-message scCreateDIDsReply {
+message RegistryCreateDidResponse {
   string did = 1;
 }
 
-// The request message containing the publicKey.
-message scRegisterDIDsRequest {
+message RegistryRegisterDidRequest {
   string did = 1;
   string document = 2;
 }
 
-// The response message containing the result.
-message scRegisterDIDsReply {
+message RegistryRegisterDidResponse {
   string result = 1;
 }
 
-// The request message containing the DID.
-message scResolveDIDsRequest {
+message RegistryResolveDidRequest {
   string did = 1;
 }
 
-// The response message containing the DID document.
-message scResolveDIDsReply {
-  string resolutionError = 1;
-  string didDocument = 2;
-  string didDocumentMetadata = 3;
+message RegistryResolveDidResponse {
+  string resolution_error = 1;
+  string did_document = 2;
+  string did_document_metadata = 3;
 }
 
-// The request message containing the DID & document.
-message scUpdateDIDsRequest {
+message RegistryUpdateDidRequest {
   string did = 1;
   string document = 2;
 }
 
-// The response message containing the result.
-message scUpdateDIDsReply {
+message RegistryUpdateDidResponse {
   string result = 1;
 }

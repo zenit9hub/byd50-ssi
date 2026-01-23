@@ -15,30 +15,30 @@ type fakeRegistrarClient struct {
 	docs map[string]string
 }
 
-func (f *fakeRegistrarClient) CreateDID(_ context.Context, in *pb.CreateDIDsRequest, _ ...grpc.CallOption) (*pb.CreateDIDsReply, error) {
+func (f *fakeRegistrarClient) CreateDid(_ context.Context, in *pb.CreateDidRequest, _ ...grpc.CallOption) (*pb.CreateDidResponse, error) {
 	method := in.GetMethod()
 	if method == "" {
 		method = "byd50"
 	}
 	createdDid, doc := dids.CreateDID(method, in.GetPublicKeyBase58())
 	f.docs[createdDid] = string(doc)
-	return &pb.CreateDIDsReply{Did: createdDid}, nil
+	return &pb.CreateDidResponse{Did: createdDid}, nil
 }
 
-func (f *fakeRegistrarClient) RegisterDID(_ context.Context, _ *pb.RegisterDIDsRequest, _ ...grpc.CallOption) (*pb.RegisterDIDsReply, error) {
-	return &pb.RegisterDIDsReply{}, nil
+func (f *fakeRegistrarClient) RegisterDid(_ context.Context, _ *pb.RegisterDidRequest, _ ...grpc.CallOption) (*pb.RegisterDidResponse, error) {
+	return &pb.RegisterDidResponse{}, nil
 }
 
-func (f *fakeRegistrarClient) ResolveDID(_ context.Context, in *pb.ResolveDIDsRequest, _ ...grpc.CallOption) (*pb.ResolveDIDsReply, error) {
+func (f *fakeRegistrarClient) ResolveDid(_ context.Context, in *pb.ResolveDidRequest, _ ...grpc.CallOption) (*pb.ResolveDidResponse, error) {
 	doc, ok := f.docs[in.GetDid()]
 	if !ok {
-		return &pb.ResolveDIDsReply{ResolutionError: "not_found"}, nil
+		return &pb.ResolveDidResponse{ResolutionError: "not_found"}, nil
 	}
-	return &pb.ResolveDIDsReply{DidDocument: doc}, nil
+	return &pb.ResolveDidResponse{DidDocument: doc}, nil
 }
 
-func (f *fakeRegistrarClient) UpdateDID(_ context.Context, _ *pb.UpdateDIDsRequest, _ ...grpc.CallOption) (*pb.UpdateDIDsReply, error) {
-	return &pb.UpdateDIDsReply{Result: "ok"}, nil
+func (f *fakeRegistrarClient) UpdateDid(_ context.Context, _ *pb.UpdateDidRequest, _ ...grpc.CallOption) (*pb.UpdateDidResponse, error) {
+	return &pb.UpdateDidResponse{Result: "ok"}, nil
 }
 
 func TestControllerFlow(t *testing.T) {

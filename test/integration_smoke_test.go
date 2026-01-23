@@ -30,7 +30,7 @@ func TestRegistrarSmoke(t *testing.T) {
 		t.Fatalf("failed to init KMS: %v", err)
 	}
 
-	createResp, err := client.CreateDID(ctx, &pb.CreateDIDsRequest{
+	createResp, err := client.CreateDid(ctx, &pb.CreateDidRequest{
 		PublicKeyBase58: sessionKMS.PbKeyBase58(),
 		Method:          "byd50",
 	})
@@ -41,7 +41,7 @@ func TestRegistrarSmoke(t *testing.T) {
 		t.Fatalf("create did returned empty DID")
 	}
 
-	resolveResp, err := client.ResolveDID(ctx, &pb.ResolveDIDsRequest{Did: createResp.GetDid()})
+	resolveResp, err := client.ResolveDid(ctx, &pb.ResolveDidRequest{Did: createResp.GetDid()})
 	if err != nil {
 		t.Fatalf("resolve did failed: %v", err)
 	}

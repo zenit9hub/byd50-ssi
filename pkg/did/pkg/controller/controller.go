@@ -3,8 +3,8 @@ package controller
 import (
 	"byd50-ssi/pkg/did/core"
 	"byd50-ssi/pkg/did/core/dids"
-	derrors "byd50-ssi/pkg/did/errors"
 	"byd50-ssi/pkg/did/core/rc"
+	derrors "byd50-ssi/pkg/did/errors"
 	pb "byd50-ssi/proto-files"
 	"context"
 	"encoding/json"
@@ -37,7 +37,7 @@ func CreateDIDWithErr(pbKeyBase58, method string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	r, err := registrarClient.CreateDID(ctx, &pb.CreateDIDsRequest{PublicKeyBase58: pbKeyBase58, Method: method})
+	r, err := registrarClient.CreateDid(ctx, &pb.CreateDidRequest{PublicKeyBase58: pbKeyBase58, Method: method})
 	if err != nil {
 		return "", derrors.Wrap(derrors.CodeUpstream, "registrar create did failed", err)
 	}
@@ -105,7 +105,7 @@ func ResolveDIDWithErr(dID string) (string, error) {
 	// Contact the server and print out its response.
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	r, err := registrarClient.ResolveDID(ctx, &pb.ResolveDIDsRequest{Did: dID})
+	r, err := registrarClient.ResolveDid(ctx, &pb.ResolveDidRequest{Did: dID})
 	if err != nil {
 		return "", derrors.Wrap(derrors.CodeUpstream, "registrar resolve did failed", err)
 	}

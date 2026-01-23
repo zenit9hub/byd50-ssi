@@ -148,15 +148,15 @@ func (s *server) ReqCredIdCard(_ context.Context, in *pb.IdCardRequest) (*pb.IdC
 	eIdVcJwt := core.CreateVcWithClaims(kid, claims, pvKey)
 
 	log.Printf("[ReqCredIdCard][Reply] vcJwt: %v", eIdVcJwt)
-	return &pb.IdCardReply{EIdVcJwt: eIdVcJwt}, nil
+	return &pb.IdCardReply{EidVcJwt: eIdVcJwt}, nil
 }
 
 // ReqCredDlCard implements proto-files.GreeterServer
 func (s *server) ReqCredDlCard(_ context.Context, in *pb.DlCardRequest) (*pb.DlCardReply, error) {
 	log.Printf("[ReqCredDlCard][Request]")
 
-	log.Printf("EIdVcJwt >>\n%v", in.GetEIdVcJwt())
-	valid, did, err := core.VerifyVp(in.GetEIdVcJwt(), controller.GetPublicKey)
+	log.Printf("EIdVcJwt >>\n%v", in.GetEidVcJwt())
+	valid, did, err := core.VerifyVp(in.GetEidVcJwt(), controller.GetPublicKey)
 	log.Printf("ReqCredDlCard ~~~   %v, %v, err:%v", valid, did, err)
 	result := ""
 	eDlVcJwt := ""
@@ -215,12 +215,12 @@ func (s *server) ReqCredDlCard(_ context.Context, in *pb.DlCardRequest) (*pb.DlC
 	}
 
 	log.Printf("[ReqCredDlCard][Reply] vcJwt: %v", eDlVcJwt)
-	return &pb.DlCardReply{Valid: valid, Result: result, EDlVcJwt: eDlVcJwt}, nil
+	return &pb.DlCardReply{Valid: valid, Result: result, EdlVcJwt: eDlVcJwt}, nil
 }
 
 // ReqCredRentalCarAgreement implements proto-files.GreeterServer
 func (s *server) ReqCredRentalCarAgreement(_ context.Context, in *pb.RentalCarAgreementRequest) (*pb.RentalCarAgreementReply, error) {
-	valid, did, err := core.VerifyVp(in.GetEDlVcJwt(), controller.GetPublicKey)
+	valid, did, err := core.VerifyVp(in.GetEdlVcJwt(), controller.GetPublicKey)
 	result := ""
 	rentalCarAgreementVcJwt := ""
 	if err != nil {

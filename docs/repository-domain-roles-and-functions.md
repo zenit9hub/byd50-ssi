@@ -33,9 +33,9 @@
 ## DID Registry 서버(`apps/did-registry/`)
 - 역할: PoC용 DID Document 저장소. LevelDB에 DID→문서 바이트 저장.
 - gRPC 인터페이스(`proto-files/registry.proto` 기반):  
-  - `ScCreateDID`: 입력 공개키로 DID/문서 생성(`dids.CreateDID`) 후 저장.  
-  - `ScResolveDID`: DID로 문서 조회, 없으면 `NotFound` 에러 문자열.  
-  - `ScUpdateDID`: 존재 여부 확인 후 문서 업데이트(검증 로직 미구현).
+  - `CreateDid`: 입력 공개키로 DID/문서 생성(`dids.CreateDID`) 후 저장.  
+  - `ResolveDid`: DID로 문서 조회, 없으면 `NotFound` 에러 문자열.  
+  - `UpdateDid`: 존재 여부 확인 후 문서 업데이트(검증 로직 미구현).
 - 구성: `configs.UseConfig.DidRegistryPort`에서 리스닝, 서버 시작/종료 시 DB 열고 닫음.
 
 ## DID Registrar 서버(`apps/did-registrar/`)

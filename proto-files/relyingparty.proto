@@ -14,58 +14,48 @@
 
 syntax = "proto3";
 
-option go_package = "google.golang.org/grpc/examples/proto-files/proto-files";
+option go_package = "byd50-ssi/proto-files";
 option java_multiple_files = true;
 option java_package = "io.grpc.examples.proto-files";
 option java_outer_classname = "HelloWorldProto";
 
 package relyingparty;
 
-// The greeting service definition.
 service RelyingParty {
-  // Sends a greeting
   rpc AuthChallenge (ChallengeRequest) returns (ChallengeReply) {}
   rpc AuthResponse (ResponseRequest) returns (ResponseReply) {}
   rpc SimplePresent (SimplePresentRequest) returns (SimplePresentReply) {}
   rpc VerifyVp (VerifyVpRequest) returns (VerifyVpReply) {}
 }
 
-// The request message containing the user's DID.
 message ChallengeRequest {
   string did = 1;
 }
 
-// The response message containing the Auth-challenge Strings
 message ChallengeReply {
-  string authChallenge = 1;
+  string auth_challenge = 1;
 }
 
-// The request message containing the user's DID.
 message ResponseRequest {
-  string authResponse = 1;
+  string auth_response = 1;
 }
 
-// The response message containing the Auth-challenge Strings
 message ResponseReply {
   string message = 1;
 }
 
-// The request message containing the simplePresent.
 message SimplePresentRequest {
-  string simplePresent = 1;
+  string simple_present = 1;
 }
 
-// The response message containing the result
 message SimplePresentReply {
   string result = 1;
 }
 
-// The request message containing the simplePresent.
 message VerifyVpRequest {
   string vp = 1;
 }
 
-// The response message containing the result
 message VerifyVpReply {
   string result = 1;
 }

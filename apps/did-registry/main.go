@@ -42,22 +42,22 @@ type server struct {
 	pb.UnimplementedRegistryServer
 }
 
-// ScCreateDID implements proto-files.GreeterServer
-func (s *server) ScCreateDID(ctx context.Context, in *pb.ScCreateDIDsRequest) (*pb.ScCreateDIDsReply, error) {
+// CreateDid implements proto-files.RegistryServer
+func (s *server) CreateDid(ctx context.Context, in *pb.RegistryCreateDidRequest) (*pb.RegistryCreateDidResponse, error) {
 	pbKey := in.GetPublicKey()
 	method := "byd50"
 	createdDID, doc := dids.CreateDID(method, pbKey)
 
 	if err := registryStore.Put(ctx, createdDID, doc); err != nil {
-		log.Printf("[ScCreateDID] - [%v] store error: %v", createdDID, err)
+		log.Printf("[CreateDid] - [%v] store error: %v", createdDID, err)
 	}
 
-	log.Printf("[ScCreateDID] - [%v] %s", createdDID, doc)
-	return &pb.ScCreateDIDsReply{Did: createdDID}, nil
+	log.Printf("[CreateDid] - [%v] %s", createdDID, doc)
+	return &pb.RegistryCreateDidResponse{Did: createdDID}, nil
 }
 
-// ScResolveDID implements proto-files.GreeterServer
-func (s *server) ScResolveDID(ctx context.Context, in *pb.ScResolveDIDsRequest) (*pb.ScResolveDIDsReply, error) {
+// ResolveDid implements proto-files.RegistryServer
+func (s *server) ResolveDid(ctx context.Context, in *pb.RegistryResolveDidRequest) (*pb.RegistryResolveDidResponse, error) {
 	// resolve DID's Document
 	var resolutionError string
 	var didDocument string
@@ -66,17 +66,17 @@ func (s *server) ScResolveDID(ctx context.Context, in *pb.ScResolveDIDsRequest) 
 
 	if err != nil {
 		resolutionError = dids.NotFound.String()
-		log.Printf("ScResolveDID error:%v", resolutionError)
+		log.Printf("ResolveDid error:%v", resolutionError)
 	} else {
 		didDocument = string(docuByteArray)
 		didDocumentMetadata = ""
 	}
-	log.Printf("ScResolveDID - [%v] %v", in.GetDid(), string(docuByteArray))
-	return &pb.ScResolveDIDsReply{ResolutionError: resolutionError, DidDocument: didDocument, DidDocumentMetadata: didDocumentMetadata}, nil
+	log.Printf("ResolveDid - [%v] %v", in.GetDid(), string(docuByteArray))
+	return &pb.RegistryResolveDidResponse{ResolutionError: resolutionError, DidDocument: didDocument, DidDocumentMetadata: didDocumentMetadata}, nil
 }
 
-// ScUpdateDID implements proto-files.GreeterServer
-func (s *server) ScUpdateDID(ctx context.Context, in *pb.ScUpdateDIDsRequest) (*pb.ScUpdateDIDsReply, error) {
+// UpdateDid implements proto-files.RegistryServer
+func (s *server) UpdateDid(ctx context.Context, in *pb.RegistryUpdateDidRequest) (*pb.RegistryUpdateDidResponse, error) {
 	// update DID's Document
 	result := "success"
 
@@ -88,12 +88,12 @@ func (s *server) ScUpdateDID(ctx context.Context, in *pb.ScUpdateDIDsRequest) (*
 		if err := registryStore.Put(ctx, in.GetDid(), []byte(in.GetDocument())); err != nil {
 			log.Printf("error caused by.. err[%v], ret[%v]", err, ret)
 		}
-		log.Printf("ScUpdateDID(%v) - [%v] %v", result, in.GetDid(), in.GetDocument())
+		log.Printf("UpdateDid(%v) - [%v] %v", result, in.GetDid(), in.GetDocument())
 	} else {
 		log.Printf("error caused by.. err[%v], ret[%v]", err, ret)
 	}
 
-	return &pb.ScUpdateDIDsReply{Result: result}, nil
+	return &pb.RegistryUpdateDidResponse{Result: result}, nil
 }
 
 func initRegistry() {
