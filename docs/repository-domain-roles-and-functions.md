@@ -56,8 +56,16 @@
   - `POST /v2/testapi/vc/verify`: VC JWT 검증.  
   - `POST /v2/testapi/vp/create`: VP JWT 생성.  
   - `POST /v2/testapi/vp/verify`: VP JWT 검증.
+  - 데모 플로우:  
+    - `GET /v2/testapi/demo/actors`: 발급기관/렌터카업체 DID 조회.  
+    - `POST /v2/testapi/license/challenge`, `POST /v2/testapi/license/issue`  
+    - `POST /v2/testapi/rental/challenge`, `POST /v2/testapi/rental/issue`
 - 내부: Gin 서버, `controller`/`core`를 통해 DID/VC/VP 처리.
 - 산출물: Swagger/Redoc 문서 `api-docs/`.
+
+## Android 데모 앱(`android/`)
+- 역할: REST API 호출 + JNI(c-shared) 기반 키 생성/서명으로 데모 시나리오 실행.
+- 흐름: DID 생성 → 신원 VC → 계약 VC → VP 검증(차량 접근).
 
 ## Demo 데모 세트
 - 공통: `proto-files/relyingparty.proto`·`issuer.proto` 기반 gRPC. PoC 시나리오용 예제 코드.
