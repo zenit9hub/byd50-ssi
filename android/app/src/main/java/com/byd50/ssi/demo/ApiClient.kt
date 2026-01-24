@@ -9,7 +9,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 class ApiClient(private val baseUrl: String) {
-    private val tag = "ApiClient"
+    private val tag = TAG
 
     data class Challenge(val aud: String, val nonce: String)
     data class LicenseIssueResult(
@@ -31,7 +31,7 @@ class ApiClient(private val baseUrl: String) {
         val body = JSONObject()
         body.put("method", method)
         body.put("public_key_base58", publicKeyBase58)
-        val resp = post("/v2/testapi/create-did", body)
+        val resp = post(PATH_CREATE_DID, body)
         return resp.optString("did", "")
     }
 
@@ -46,20 +46,20 @@ class ApiClient(private val baseUrl: String) {
         body.put("kid", kid)
         body.put("pv_key_base58", pvKeyBase58)
         body.put("type", credType)
-        body.put("issuer", "http://demo-issuer.example")
+        body.put("issuer", DEFAULT_ISSUER)
         body.put("subject", kid)
         if (expiresInMinutes > 0) {
             body.put("expires_in_minutes", expiresInMinutes)
         }
         body.put("credential_subject", credentialSubject)
-        val resp = post("/v2/testapi/vc/create", body)
+        val resp = post(PATH_VC_CREATE, body)
         return resp.optString("vc_jwt", "")
     }
 
     fun verifyVc(vcJwt: String): Boolean {
         val body = JSONObject()
         body.put("vc_jwt", vcJwt)
-        val resp = post("/v2/testapi/vc/verify", body)
+        val resp = post(PATH_VC_VERIFY, body)
         return resp.optBoolean("valid", false)
     }
 
@@ -74,17 +74,17 @@ class ApiClient(private val baseUrl: String) {
         val body = JSONObject()
         body.put("holder_did", holderDid)
         body.put("pv_key_base58", pvKeyBase58)
-        body.put("type", "CredentialManagerPresentation")
+        body.put("type", VP_TYPE_DEFAULT)
         body.put("issuer", holderDid)
         body.put("subject", holderDid)
-        body.put("expires_in_minutes", 5)
+        body.put("expires_in_minutes", DEFAULT_VP_EXPIRES_MIN)
         val vcArray = JSONArray()
         vcJwts.forEach { vcArray.put(it) }
         body.put("vc_jwts", vcArray)
         body.put("aud", aud)
         body.put("nonce", nonce)
         body.put("simple_presentation", simplePresentation)
-        val resp = post("/v2/testapi/vp/create", body)
+        val resp = post(PATH_VP_CREATE, body)
         return resp.optString("vp_jwt", "")
     }
 
@@ -97,17 +97,17 @@ class ApiClient(private val baseUrl: String) {
         if (expectedNonce.isNotBlank()) {
             body.put("expected_nonce", expectedNonce)
         }
-        val resp = post("/v2/testapi/vp/verify", body)
+        val resp = post(PATH_VP_VERIFY, body)
         return resp.optBoolean("valid", false)
     }
 
     fun requestLicenseChallenge(): Challenge {
-        val resp = post("/v2/testapi/license/challenge", JSONObject())
+        val resp = post(PATH_LICENSE_CHALLENGE, JSONObject())
         return Challenge(resp.optString("aud", ""), resp.optString("nonce", ""))
     }
 
     fun requestRentalChallenge(): Challenge {
-        val resp = post("/v2/testapi/rental/challenge", JSONObject())
+        val resp = post(PATH_RENTAL_CHALLENGE, JSONObject())
         return Challenge(resp.optString("aud", ""), resp.optString("nonce", ""))
     }
 
@@ -126,7 +126,7 @@ class ApiClient(private val baseUrl: String) {
         if (expiresInSeconds > 0) {
             body.put("expires_in_seconds", expiresInSeconds)
         }
-        val resp = post("/v2/testapi/license/issue", body)
+        val resp = post(PATH_LICENSE_ISSUE, body)
         return LicenseIssueResult(
             resp.optBoolean("simple_presentation_valid", false),
             resp.optString("vc_jwt", ""),
@@ -147,7 +147,7 @@ class ApiClient(private val baseUrl: String) {
         if (expiresInSeconds > 0) {
             body.put("expires_in_seconds", expiresInSeconds)
         }
-        val resp = post("/v2/testapi/rental/issue", body)
+        val resp = post(PATH_RENTAL_ISSUE, body)
         return RentalIssueResult(
             resp.optBoolean("vp_signature_valid", false),
             resp.optBoolean("aud_nonce_valid", false),
@@ -185,7 +185,24 @@ class ApiClient(private val baseUrl: String) {
             Log.w(tag, "Empty response body")
             return JSONObject()
         }
-        Log.d(tag, "Response body: ${content.take(512)}")
+        Log.d(tag, "Response body: ${content.take(RESPONSE_LOG_MAX)}")
         return JSONObject(content)
+    }
+
+    companion object {
+        private const val TAG = "ApiClient"
+        private const val DEFAULT_ISSUER = "http://demo-issuer.example"
+        private const val VP_TYPE_DEFAULT = "CredentialManagerPresentation"
+        private const val DEFAULT_VP_EXPIRES_MIN = 5
+        private const val RESPONSE_LOG_MAX = 512
+        private const val PATH_CREATE_DID = "/v2/testapi/create-did"
+        private const val PATH_VC_CREATE = "/v2/testapi/vc/create"
+        private const val PATH_VC_VERIFY = "/v2/testapi/vc/verify"
+        private const val PATH_VP_CREATE = "/v2/testapi/vp/create"
+        private const val PATH_VP_VERIFY = "/v2/testapi/vp/verify"
+        private const val PATH_LICENSE_CHALLENGE = "/v2/testapi/license/challenge"
+        private const val PATH_LICENSE_ISSUE = "/v2/testapi/license/issue"
+        private const val PATH_RENTAL_CHALLENGE = "/v2/testapi/rental/challenge"
+        private const val PATH_RENTAL_ISSUE = "/v2/testapi/rental/issue"
     }
 }

@@ -34,7 +34,7 @@ class DemoScenario(private val api: ApiClient, private val native: NativeBridge)
 
     fun issueDriverLicense(expiresInSeconds: Int): String {
         resetLicenseChecks()
-        if (did.isEmpty()) return "DID 없음 - 1번 먼저 실행"
+        if (did.isEmpty()) return ERR_NEED_DID
         val challenge = api.requestLicenseChallenge()
         val vp = api.createVp(
             did,
@@ -46,7 +46,7 @@ class DemoScenario(private val api: ApiClient, private val native: NativeBridge)
         )
         if (vp.isBlank()) {
             licenseDidAuthValid = false
-            return "DID 인증 실패"
+            return ERR_DID_AUTH_FAILED
         }
         val issue = api.issueLicense(
             did,
@@ -59,18 +59,18 @@ class DemoScenario(private val api: ApiClient, private val native: NativeBridge)
         dlVc = issue.vcJwt
         licenseVcIssued = dlVc.isNotBlank()
         if (!licenseDidAuthValid!!) {
-            return "DID 인증 실패"
+            return ERR_DID_AUTH_FAILED
         }
         if (!licenseVcIssued!!) {
-            return if (issue.error.isNotBlank()) issue.error else "면허 VC 발급 실패"
+            return if (issue.error.isNotBlank()) issue.error else ERR_LICENSE_ISSUE_FAILED
         }
         return dlVc
     }
 
     fun issueRentalAgreement(expiresInSeconds: Int): String {
         resetRentalChecks()
-        if (did.isEmpty()) return "DID 없음 - 1번 먼저 실행"
-        if (dlVc.isEmpty()) return "면허 VC 없음 - 2번 먼저 실행"
+        if (did.isEmpty()) return ERR_NEED_DID
+        if (dlVc.isEmpty()) return ERR_NEED_LICENSE
         val challenge = api.requestRentalChallenge()
         val vp = api.createVp(
             did,
@@ -82,7 +82,7 @@ class DemoScenario(private val api: ApiClient, private val native: NativeBridge)
         )
         if (vp.isBlank()) {
             rentalVpSigValid = false
-            return "VP 생성 실패"
+            return ERR_VP_CREATE_FAILED
         }
         val issue = api.issueRental(
             vp,
@@ -96,7 +96,7 @@ class DemoScenario(private val api: ApiClient, private val native: NativeBridge)
         rentalHolderMatchValid = issue.holderDidMatch
         rentalVc = issue.vcJwt
         if (!issue.vpSignatureValid || !issue.audNonceValid || !issue.vcValid || !issue.vcNotExpired || !issue.holderDidMatch) {
-            return if (issue.error.isNotBlank()) issue.error else "렌터카 계약 실패"
+            return if (issue.error.isNotBlank()) issue.error else ERR_RENTAL_ISSUE_FAILED
         }
         return rentalVc
     }
@@ -104,7 +104,7 @@ class DemoScenario(private val api: ApiClient, private val native: NativeBridge)
     fun carAccessCheck(): String {
         if (rentalVc.isEmpty()) {
             carVpValid = null
-            return "계약 없음"
+            return ERR_NO_RENTAL
         }
         val nonce = UUID.randomUUID().toString().take(8)
         val vp = api.createVp(
@@ -117,7 +117,7 @@ class DemoScenario(private val api: ApiClient, private val native: NativeBridge)
         )
         val valid = api.verifyVp(vp, "", nonce)
         carVpValid = valid
-        return if (valid) "접근 허용(데모)" else "접근 거부(데모)"
+        return if (valid) ACCESS_ALLOWED else ACCESS_DENIED
     }
 
     private fun resetLicenseChecks() {
@@ -130,5 +130,17 @@ class DemoScenario(private val api: ApiClient, private val native: NativeBridge)
         rentalAudNonceValid = null
         rentalVcIntegrityValid = null
         rentalHolderMatchValid = null
+    }
+
+    companion object {
+        private const val ERR_NEED_DID = "DID 없음 - 1번 먼저 실행"
+        private const val ERR_NEED_LICENSE = "면허 VC 없음 - 2번 먼저 실행"
+        private const val ERR_DID_AUTH_FAILED = "DID 인증 실패"
+        private const val ERR_LICENSE_ISSUE_FAILED = "면허 VC 발급 실패"
+        private const val ERR_VP_CREATE_FAILED = "VP 생성 실패"
+        private const val ERR_RENTAL_ISSUE_FAILED = "렌터카 계약 실패"
+        private const val ERR_NO_RENTAL = "계약 없음"
+        private const val ACCESS_ALLOWED = "접근 허용(데모)"
+        private const val ACCESS_DENIED = "접근 거부(데모)"
     }
 }
