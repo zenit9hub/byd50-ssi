@@ -25,3 +25,4 @@ android/local.properties
 android/.idea/
 android/app/build/
 android/build/
+android/app/.cxx/

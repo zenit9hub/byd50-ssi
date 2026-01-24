@@ -35,6 +35,11 @@ func main() {
 	r.POST("/v2/testapi/vc/verify", api.VerifyVc)
 	r.POST("/v2/testapi/vp/create", api.CreateVp)
 	r.POST("/v2/testapi/vp/verify", api.VerifyVp)
+	r.GET("/v2/testapi/demo/actors", api.GetDemoActors)
+	r.POST("/v2/testapi/license/challenge", api.LicenseChallenge)
+	r.POST("/v2/testapi/license/issue", api.IssueLicense)
+	r.POST("/v2/testapi/rental/challenge", api.RentalChallenge)
+	r.POST("/v2/testapi/rental/issue", api.IssueRental)
 
 	url := ginSwagger.URL("http://localhost:8080/swagger/doc.json") // The url pointing to API definition
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))

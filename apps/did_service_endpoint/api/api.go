@@ -6,6 +6,7 @@ import (
 	"byd50-ssi/pkg/did/pkg/controller"
 	"crypto/ecdsa"
 	"crypto/x509"
+	"errors"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -63,6 +64,9 @@ type CreateVpRequestBody struct {
 	Issuer           string   `json:"issuer" example:"client make this vp"`
 	Subject          string   `json:"subject" example:"did:byd50:holder123"`
 	ExpiresInMinutes int      `json:"expires_in_minutes" example:"5"`
+	Audience         string   `json:"aud" example:"did:byd50:rental456"`
+	Nonce            string   `json:"nonce" example:"n-123456"`
+	SimplePresentation bool   `json:"simple_presentation" example:"false"`
 }
 
 type CreateVpResponse struct {
@@ -71,6 +75,8 @@ type CreateVpResponse struct {
 
 type VerifyVpRequestBody struct {
 	VpJwt string `json:"vp_jwt" example:"eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9..."`
+	ExpectedAud   string `json:"expected_aud,omitempty" example:"did:byd50:rental456"`
+	ExpectedNonce string `json:"expected_nonce,omitempty" example:"n-123456"`
 }
 
 type VerifyResponse struct {
@@ -345,7 +351,7 @@ func VerifyVc(c *gin.Context) {
 
 // CreateVp
 // @Summary Create VP
-// @Description Create a Verifiable Presentation (JWT) from VC JWTs.
+// @Description Create a Verifiable Presentation (JWT). Supports aud/nonce and simple presentation (no VC).
 // @ID createVp
 // @Accept  json
 // @Produce  json
@@ -365,11 +371,19 @@ func CreateVp(c *gin.Context) {
 		})
 		return
 	}
-	if requestBody.HolderDid == "" || requestBody.PvKeyBase58 == "" || len(requestBody.VcJwts) == 0 {
+	if requestBody.HolderDid == "" || requestBody.PvKeyBase58 == "" {
 		logReq(c, "CreateVp.BadRequest", map[string]string{"error": "missing required fields"})
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_PARAM",
-			Message: "holder_did, pv_key_base58, and vc_jwts are required",
+			Message: "holder_did and pv_key_base58 are required",
+		})
+		return
+	}
+	if len(requestBody.VcJwts) == 0 && !requestBody.SimplePresentation {
+		logReq(c, "CreateVp.BadRequest", map[string]string{"error": "vc_jwts required"})
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Code:    "INVALID_PARAM",
+			Message: "vc_jwts are required unless simple_presentation is true",
 		})
 		return
 	}
@@ -384,10 +398,33 @@ func CreateVp(c *gin.Context) {
 	}
 	issuer := requestBody.Issuer
 	if issuer == "" {
-		issuer = "client make this vp"
+		issuer = requestBody.HolderDid
 	}
-	stdClaims := standardClaims(issuer, requestBody.Subject, requestBody.ExpiresInMinutes)
-	vpJwt := core.CreateVp(requestBody.HolderDid, requestBody.Type, requestBody.VcJwts, stdClaims, pvKey)
+	subject := requestBody.Subject
+	if subject == "" {
+		subject = requestBody.HolderDid
+	}
+	stdClaims := standardClaims(issuer, subject, requestBody.ExpiresInMinutes)
+	if requestBody.Audience != "" {
+		stdClaims.Audience = requestBody.Audience
+	}
+	types := []string{"VerifiablePresentation"}
+	if requestBody.Type != "" {
+		types = append(types, requestBody.Type)
+	}
+	vpClaims := byd50_jwt.VpClaims{
+		requestBody.Nonce,
+		map[string]interface{}{
+			"@context": []string{
+				"https://www.w3.org/2018/credentials/v1",
+				"https://www.w3.org/2018/credentials/examples/v1",
+			},
+			"type":                 types,
+			"verifiableCredential": requestBody.VcJwts,
+		},
+		stdClaims,
+	}
+	vpJwt := core.CreateVpWithClaims(requestBody.HolderDid, vpClaims, pvKey)
 	if vpJwt == "" {
 		logReq(c, "CreateVp.Error", map[string]string{"error": "create vp failed"})
 		c.JSON(http.StatusInternalServerError, ErrorResponse{
@@ -402,7 +439,7 @@ func CreateVp(c *gin.Context) {
 
 // VerifyVp
 // @Summary Verify VP
-// @Description Verify a VP (JWT) using DID resolver for public key lookup.
+// @Description Verify a VP (JWT) using DID resolver for public key lookup. Optionally checks aud/nonce.
 // @ID verifyVp
 // @Accept  json
 // @Produce  json
@@ -430,12 +467,46 @@ func VerifyVp(c *gin.Context) {
 		return
 	}
 	logReq(c, "VerifyVp.Request", map[string]string{"vp_len": strconv.Itoa(len(requestBody.VpJwt))})
-	ok, _, err := core.VerifyVp(requestBody.VpJwt, controller.GetPublicKey)
-	if err != nil {
+	ok, did, err := core.VerifyVp(requestBody.VpJwt, controller.GetPublicKey)
+	if err != nil || !ok {
+		if err == nil {
+			err = errors.New("vp signature invalid")
+		}
 		logReq(c, "VerifyVp.Result", map[string]string{"valid": "false", "error": err.Error()})
 		c.JSON(http.StatusOK, VerifyResponse{Valid: false, Error: err.Error()})
 		return
 	}
-	logReq(c, "VerifyVp.Result", map[string]string{"valid": strconv.FormatBool(ok)})
-	c.JSON(http.StatusOK, VerifyResponse{Valid: ok})
+	_, claims, err := core.GetMapClaims(requestBody.VpJwt, controller.GetPublicKey)
+	if err == nil && claims != nil {
+		if requestBody.ExpectedAud != "" && !matchAudience(claims["aud"], requestBody.ExpectedAud) {
+			c.JSON(http.StatusOK, VerifyResponse{Valid: false, Error: "audience mismatch"})
+			return
+		}
+		if requestBody.ExpectedNonce != "" {
+			nonce, _ := claims["nonce"].(string)
+			if nonce != requestBody.ExpectedNonce {
+				c.JSON(http.StatusOK, VerifyResponse{Valid: false, Error: "nonce mismatch"})
+				return
+			}
+		}
+		vcJwts, _ := extractVcJwtsFromVp(claims)
+		if len(vcJwts) > 0 {
+			vcValid, _ := core.VerifyVc(vcJwts[0], controller.GetPublicKey)
+			if !vcValid {
+				c.JSON(http.StatusOK, VerifyResponse{Valid: false, Error: "vc signature invalid"})
+				return
+			}
+			if vcExpired(vcJwts[0]) {
+				c.JSON(http.StatusOK, VerifyResponse{Valid: false, Error: "vc expired"})
+				return
+			}
+			holderDid := vcHolderDid(vcJwts[0])
+			if holderDid != "" && did != "" && holderDid != did {
+				c.JSON(http.StatusOK, VerifyResponse{Valid: false, Error: "vc holder mismatch"})
+				return
+			}
+		}
+	}
+	logReq(c, "VerifyVp.Result", map[string]string{"valid": "true"})
+	c.JSON(http.StatusOK, VerifyResponse{Valid: true})
 }

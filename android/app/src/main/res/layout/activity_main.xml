@@ -33,31 +33,150 @@
         android:id="@+id/btnCreateDid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="1. DID 발급" />
+        android:text="1. DID 생성(식별자 발급)" />
 
-    <Button
-        android:id="@+id/btnIssueId"
+    <TextView
+        android:id="@+id/txtDid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="2. 전자주민증 VC 발급" />
+        android:text="현재 DID: 없음"
+        android:textSize="12sp" />
 
-    <Button
-        android:id="@+id/btnIssueDl"
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="#888888" />
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="3. 전자면허증 VC 발급" />
+        android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/btnIssueRental"
+        <EditText
+            android:id="@+id/inputDlExpirySec"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="기본값:300초"
+            android:inputType="number"
+            android:maxLines="1"
+            android:textColorHint="#888888" />
+
+        <Button
+            android:id="@+id/btnIssueDl"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="2. 신원 VC 발급(기관)" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/txtDlStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="4. 렌터카 계약 VC 발급" />
+        android:text="상태: 대기"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/txtDlCheckDidAuth"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="[ ] DID 인증 체크"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/txtDlCheckVcIssued"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="[ ] VC 생성 발급"
+        android:textSize="12sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="#888888" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/inputRentalExpirySec"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="기본값:60초"
+            android:inputType="number"
+            android:maxLines="1"
+            android:textColorHint="#888888" />
+
+        <Button
+            android:id="@+id/btnIssueRental"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="3. 계약 VC 발급(민간)" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/txtRentalStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="상태: 대기"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/txtRentalCheckVpSig"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="[ ] VP 서명 검증"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/txtRentalCheckAudNonce"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="[ ] VP에 포함 요구한 2개 필드 체크"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/txtRentalCheckVcIntegrity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="[ ] VP에 포함된 VC 무결성 체크"
+        android:textSize="12sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="#888888" />
 
     <Button
         android:id="@+id/btnCarAccess"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="5. 차량 접근 테스트" />
+        android:text="4. VP 제출 (차량 제어 검증)" />
+
+    <TextView
+        android:id="@+id/txtCarCheckVp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="[ ] VP 무결성 체크"
+        android:textSize="12sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="#888888" />
 
     <Button
         android:id="@+id/btnShowKeys"

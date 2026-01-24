@@ -1,15 +1,28 @@
 package com.byd50.ssi.demo
 
-import org.json.JSONObject
+import java.util.UUID
 
 class DemoScenario(private val api: ApiClient, private val native: NativeBridge) {
     var did: String = ""
         private set
-    var idVc: String = ""
-        private set
     var dlVc: String = ""
         private set
     var rentalVc: String = ""
+        private set
+
+    var licenseDidAuthValid: Boolean? = null
+        private set
+    var licenseVcIssued: Boolean? = null
+        private set
+    var rentalVpSigValid: Boolean? = null
+        private set
+    var rentalAudNonceValid: Boolean? = null
+        private set
+    var rentalVcIntegrityValid: Boolean? = null
+        private set
+    var rentalHolderMatchValid: Boolean? = null
+        private set
+    var carVpValid: Boolean? = null
         private set
 
     fun createDid(): String {
@@ -19,37 +32,103 @@ class DemoScenario(private val api: ApiClient, private val native: NativeBridge)
         return did
     }
 
-    fun issueIdCard(): String {
-        if (did.isEmpty()) createDid()
-        val subject = JSONObject()
-        subject.put("name", "Hong Gil-Dong")
-        subject.put("birth", "2000-11-08")
-        idVc = api.createVc(did, native.getPrivateKeyBase58(), "eIdCardCredential", subject)
-        return idVc
-    }
-
-    fun issueDriverLicense(): String {
-        if (idVc.isEmpty()) issueIdCard()
-        val subject = JSONObject()
-        subject.put("licenseType", "Type-1")
-        subject.put("country", "KR")
-        dlVc = api.createVc(did, native.getPrivateKeyBase58(), "eDlCardCredential", subject)
+    fun issueDriverLicense(expiresInSeconds: Int): String {
+        resetLicenseChecks()
+        if (did.isEmpty()) return "DID 없음 - 1번 먼저 실행"
+        val challenge = api.requestLicenseChallenge()
+        val vp = api.createVp(
+            did,
+            native.getPrivateKeyBase58(),
+            emptyList(),
+            challenge.aud,
+            challenge.nonce,
+            true
+        )
+        if (vp.isBlank()) {
+            licenseDidAuthValid = false
+            return "DID 인증 실패"
+        }
+        val issue = api.issueLicense(
+            did,
+            vp,
+            challenge.aud,
+            challenge.nonce,
+            expiresInSeconds
+        )
+        licenseDidAuthValid = issue.simplePresentationValid
+        dlVc = issue.vcJwt
+        licenseVcIssued = dlVc.isNotBlank()
+        if (!licenseDidAuthValid!!) {
+            return "DID 인증 실패"
+        }
+        if (!licenseVcIssued!!) {
+            return if (issue.error.isNotBlank()) issue.error else "면허 VC 발급 실패"
+        }
         return dlVc
     }
 
-    fun issueRentalAgreement(): String {
-        if (dlVc.isEmpty()) issueDriverLicense()
-        val subject = JSONObject()
-        subject.put("agreementId", "rent-${System.currentTimeMillis()}")
-        subject.put("validDays", 1)
-        rentalVc = api.createVc(did, native.getPrivateKeyBase58(), "RentalCarAgreementCredential", subject)
+    fun issueRentalAgreement(expiresInSeconds: Int): String {
+        resetRentalChecks()
+        if (did.isEmpty()) return "DID 없음 - 1번 먼저 실행"
+        if (dlVc.isEmpty()) return "면허 VC 없음 - 2번 먼저 실행"
+        val challenge = api.requestRentalChallenge()
+        val vp = api.createVp(
+            did,
+            native.getPrivateKeyBase58(),
+            listOf(dlVc),
+            challenge.aud,
+            challenge.nonce,
+            false
+        )
+        if (vp.isBlank()) {
+            rentalVpSigValid = false
+            return "VP 생성 실패"
+        }
+        val issue = api.issueRental(
+            vp,
+            challenge.aud,
+            challenge.nonce,
+            expiresInSeconds
+        )
+        rentalVpSigValid = issue.vpSignatureValid
+        rentalAudNonceValid = issue.audNonceValid
+        rentalVcIntegrityValid = issue.vcValid && issue.vcNotExpired
+        rentalHolderMatchValid = issue.holderDidMatch
+        rentalVc = issue.vcJwt
+        if (!issue.vpSignatureValid || !issue.audNonceValid || !issue.vcValid || !issue.vcNotExpired || !issue.holderDidMatch) {
+            return if (issue.error.isNotBlank()) issue.error else "렌터카 계약 실패"
+        }
         return rentalVc
     }
 
     fun carAccessCheck(): String {
-        if (rentalVc.isEmpty()) return "계약 없음"
-        val vp = api.createVp(did, native.getPrivateKeyBase58(), rentalVc)
-        val valid = api.verifyVp(vp)
+        if (rentalVc.isEmpty()) {
+            carVpValid = null
+            return "계약 없음"
+        }
+        val nonce = UUID.randomUUID().toString().take(8)
+        val vp = api.createVp(
+            did,
+            native.getPrivateKeyBase58(),
+            listOf(rentalVc),
+            "",
+            nonce,
+            false
+        )
+        val valid = api.verifyVp(vp, "", nonce)
+        carVpValid = valid
         return if (valid) "접근 허용(데모)" else "접근 거부(데모)"
+    }
+
+    private fun resetLicenseChecks() {
+        licenseDidAuthValid = null
+        licenseVcIssued = null
+    }
+
+    private fun resetRentalChecks() {
+        rentalVpSigValid = null
+        rentalAudNonceValid = null
+        rentalVcIntegrityValid = null
+        rentalHolderMatchValid = null
     }
 }
