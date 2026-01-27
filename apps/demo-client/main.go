@@ -16,7 +16,8 @@
  *
  */
 
-// Package main implements a client for Greeter service.
+// Package main runs the demo-client flow that exercises DID auth and VC/VP exchange
+// against gRPC services (demo-rp, demo-issuer).
 package main
 
 import (
@@ -46,14 +47,17 @@ var (
 	issuerClient pb.IssuerClient
 )
 
+// logSectionStart prints a visible section header for demo output.
 func logSectionStart(title string) {
 	log.Printf("\n[%s] START", title)
 }
 
+// logSectionEnd prints a visible section footer for demo output.
 func logSectionEnd(title string) {
 	log.Printf("[%s] END\n", title)
 }
 
+// logDidDocument pretty-prints a DID Document JSON string for training visibility.
 func logDidDocument(label, doc string) {
 	if doc == "" {
 		log.Printf("\n[%s]\n<empty>", label)
@@ -69,6 +73,8 @@ func logDidDocument(label, doc string) {
 	log.Printf("\n[%s]\n%s", label, pretty)
 }
 
+// mustPvKeyECDSA returns the ECDSA private key or exits on misconfiguration.
+// VC/VP signing uses ECDSA in this demo.
 func mustPvKeyECDSA(dkms kms.KMS) *ecdsa.PrivateKey {
 	pvKey, err := dkms.PvKeyECDSA()
 	if err != nil {
@@ -77,6 +83,7 @@ func mustPvKeyECDSA(dkms kms.KMS) *ecdsa.PrivateKey {
 	return pvKey
 }
 
+// GetRelyingPartyClient creates (once) the gRPC client used for auth and VP verify.
 func GetRelyingPartyClient(serviceHost string) pb.RelyingPartyClient {
 	onceRpRPC.Do(func() {
 		// Set up a connection to the server.
@@ -93,6 +100,7 @@ func GetRelyingPartyClient(serviceHost string) pb.RelyingPartyClient {
 	return relyingPartyClient
 }
 
+// GetIssuerClient creates (once) the gRPC client used to request VC issuance.
 func GetIssuerClient(serviceHost string) pb.IssuerClient {
 	onceIssRPC.Do(func() {
 		// Set up a connection to the server.
@@ -109,6 +117,8 @@ func GetIssuerClient(serviceHost string) pb.IssuerClient {
 	return issuerClient
 }
 
+// UseCase1DefaultAuthentication performs challenge/response DID authentication.
+// Flow: RP issues challenge -> holder decrypts -> holder responds -> RP verifies.
 func UseCase1DefaultAuthentication(dkms kms.KMS) {
 	// Set up a connection to the server.
 	relyingPartyClient := GetRelyingPartyClient(configs.UseConfig.RelyingPartyAddress)
@@ -142,6 +152,8 @@ func UseCase1DefaultAuthentication(dkms kms.KMS) {
 	log.Printf("Auth response: %s", responseReply.GetMessage())
 }
 
+// UseCase2SimpleAuthentication sends a Simple Presentation (DID+timestamp+signature).
+// This demonstrates a lightweight holder-authentication pattern.
 func UseCase2SimpleAuthentication(dkms kms.KMS) {
 	// Set up a connection to the server.
 	relyingPartyClient := GetRelyingPartyClient(configs.UseConfig.RelyingPartyAddress)
@@ -164,6 +176,8 @@ func UseCase2SimpleAuthentication(dkms kms.KMS) {
 	log.Printf("Simple present result: %s", simplePresentReply.GetResult())
 }
 
+// UseCase3RequestCredential requests a VC from the issuer and submits a VP to the RP.
+// The VP contains the VC JWT and is signed by the holder DID.
 func UseCase3RequestCredential(dkms kms.KMS) {
 	// Set up a connection to the server.
 	issuerClient := GetIssuerClient(configs.UseConfig.IssuerAddress)
@@ -282,6 +296,10 @@ func UseCase3RequestCredential(dkms kms.KMS) {
 	log.Printf("\n[VP Verify PublicKey PEM]\n%v", dkms.PbKeyPEM())
 }
 
+// main executes the end-to-end demo sequence:
+// 1) DID auth challenge/response (RSA)
+// 2) Simple Presentation (RSA)
+// 3) VC issuance + VP submission (ECDSA)
 func main() {
 	// Auth flows use RSA; VC/VP flows use ECDSA.
 	authKMS, err := kms.InitKMS(kms.KeyTypeRSA)
