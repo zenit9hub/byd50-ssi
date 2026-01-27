@@ -4,13 +4,8 @@ import (
 	didcore "byd50-ssi/pkg/did/core"
 	"byd50-ssi/pkg/keys"
 	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
 	"crypto/rsa"
-	"crypto/x509"
-	"encoding/pem"
 	"errors"
-	"github.com/btcsuite/btcutil/base58"
 	"log"
 )
 
@@ -170,8 +165,7 @@ func GenerateKeyPair(keyType string) (interface{}, interface{}) {
 	case KeyTypeRSA:
 		privateKey, publicKey = keys.GenerateKeyPair(2048)
 	case KeyTypeECDSA:
-		privateKey, _ = ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-		publicKey = &privateKey.(*ecdsa.PrivateKey).PublicKey
+		privateKey, publicKey, _ = keys.GenerateECDSAKeyPair()
 	default:
 		log.Fatal("unknown keyType")
 	}
@@ -230,107 +224,67 @@ func GetKMS() KMS {
 
 // ExportPrivateKeyAsPEM : Exports a PrivateKey as PEM.
 func ExportPrivateKeyAsPEM(privateKey interface{}) string {
-	var privateKeyPEM []byte
-
 	switch v := privateKey.(type) {
 	case *rsa.PrivateKey:
-		privateKeyBytes := x509.MarshalPKCS1PrivateKey(v)
-		privateKeyPEM = pem.EncodeToMemory(
-			&pem.Block{
-				Type:  "RSA PRIVATE KEY",
-				Bytes: privateKeyBytes,
-			},
-		)
+		return keys.ExportRSAPrivateKeyAsPEM(v)
 	case *ecdsa.PrivateKey:
-		privateKeyBytes, err := x509.MarshalECPrivateKey(v)
-		if err != nil {
-			log.Printf("%v", err.Error())
-		} else {
-			privateKeyPEM = pem.EncodeToMemory(
-				&pem.Block{
-					Type:  "ECDSA PRIVATE KEY",
-					Bytes: privateKeyBytes,
-				},
-			)
-		}
-	default:
-		log.Printf("unknown key type")
-	}
-
-	return string(privateKeyPEM)
-}
-
-// ExportPublicKeyAsPEM : Exports a PublicKey as PEM.
-func ExportPublicKeyAsPEM(publicKey interface{}) string {
-	var publicKeyPEM []byte
-	switch v := publicKey.(type) {
-	case *rsa.PublicKey:
-		publicKeyBytes, err := x509.MarshalPKIXPublicKey(v)
+		pemStr, err := keys.ExportECDSAPrivateKeyAsPEM(v)
 		if err != nil {
 			log.Printf("%v", err.Error())
 			return ""
 		}
-		publicKeyPEM = pem.EncodeToMemory(
-			&pem.Block{
-				Type:  "RSA PUBLIC KEY",
-				Bytes: publicKeyBytes,
-			},
-		)
-	case *ecdsa.PublicKey:
-		publicKeyBytes, err := x509.MarshalPKIXPublicKey(v)
-		if err != nil {
-			log.Printf("%v", err.Error())
-		} else {
-			publicKeyPEM = pem.EncodeToMemory(
-				&pem.Block{
-					Type:  "PUBLIC KEY",
-					Bytes: publicKeyBytes,
-				},
-			)
-		}
+		return pemStr
 	default:
 		log.Printf("unknown key type")
+		return ""
 	}
+}
 
-	return string(publicKeyPEM)
+// ExportPublicKeyAsPEM : Exports a PublicKey as PEM.
+func ExportPublicKeyAsPEM(publicKey interface{}) string {
+	switch v := publicKey.(type) {
+	case *rsa.PublicKey:
+		pemStr, err := keys.ExportRSAPublicKeyAsPEM(v)
+		if err != nil {
+			log.Printf("%v", err.Error())
+			return ""
+		}
+		return pemStr
+	case *ecdsa.PublicKey:
+		pemStr, err := keys.ExportECDSAPublicKeyAsPEM(v)
+		if err != nil {
+			log.Printf("%v", err.Error())
+			return ""
+		}
+		return pemStr
+	default:
+		log.Printf("unknown key type")
+		return ""
+	}
 }
 
 // ExportPrivateKeyAsBase58 : Exports a PrivateKey as Base58.
 func ExportPrivateKeyAsBase58(privateKey interface{}) string {
-	var privateKeyBase58 string
-	switch privateKey.(type) {
+	switch v := privateKey.(type) {
 	case *rsa.PrivateKey:
-		privateKeyBase58 = base58.Encode(x509.MarshalPKCS1PrivateKey(privateKey.(*rsa.PrivateKey)))
+		return keys.ExportRSAPrivateKeyAsBase58(v)
 	case *ecdsa.PrivateKey:
-		privateKeyBytes, err := x509.MarshalECPrivateKey(privateKey.(*ecdsa.PrivateKey))
-		if err != nil {
-			log.Printf("error occured: %v", err.Error())
-		} else {
-			privateKeyBase58 = base58.Encode(privateKeyBytes)
-		}
+		return keys.ExportECDSAPrivateKeyAsBase58(v)
 	default:
 		log.Printf("unknown key type")
+		return ""
 	}
-
-	return privateKeyBase58
 }
 
 // ExportPublicKeyAsBase58 : Exports a PublicKey as Base58.
 func ExportPublicKeyAsBase58(publicKey interface{}) string {
-	var publicKeyBase58 string
-	switch publicKey.(type) {
+	switch v := publicKey.(type) {
 	case *rsa.PublicKey:
-		publicKeyBase58 = base58.Encode(x509.MarshalPKCS1PublicKey(publicKey.(*rsa.PublicKey)))
+		return keys.ExportRSAPublicKeyAsBase58(v)
 	case *ecdsa.PublicKey:
-		publicKeyBytes, err := x509.MarshalPKIXPublicKey(publicKey)
-		if err != nil {
-			log.Printf("error occured: %v", err.Error())
-		} else {
-			publicKeyBase58 = base58.Encode(publicKeyBytes)
-		}
+		return keys.ExportECDSAPublicKeyAsBase58(v)
 	default:
 		log.Printf("unknown key type")
+		return ""
 	}
-
-	return publicKeyBase58
 }
