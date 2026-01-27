@@ -22,10 +22,26 @@ else
 fi
 
 echo "[dev-status] listening ports"
+DEFAULT_PORTS="50051 50052 50053 50054 50055 8080"
+PORTS="${DEV_PORTS:-$DEFAULT_PORTS}"
+SUDO="${DEV_STATUS_SUDO:-}"
+
+run_cmd() {
+  if [[ -n "${SUDO}" ]]; then
+    sudo "$@"
+  else
+    "$@"
+  fi
+}
+
 if command -v lsof >/dev/null 2>&1; then
-  for port in 50051 50052 50053 50054 50055; do
-    if lsof -iTCP:"${port}" -sTCP:LISTEN >/dev/null 2>&1; then
-      echo "  ${port}: in use"
+  for port in ${PORTS}; do
+    pids="$(run_cmd lsof -tiTCP:LISTEN -i :"${port}" 2>/dev/null || true)"
+    if [[ -n "${pids}" ]]; then
+      for pid in ${pids}; do
+        cmd="$(ps -p "${pid}" -o comm= 2>/dev/null || true)"
+        echo "  ${port}: in use (pid=${pid} ${cmd})"
+      done
     else
       echo "  ${port}: free"
     fi

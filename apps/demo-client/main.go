@@ -279,6 +279,7 @@ func UseCase3RequestCredential(dkms kms.KMS) {
 	VpReply, err := relyingPartyClient.VerifyVp(ctxRp, &pb.VerifyVpRequest{Vp: myVp})
 
 	log.Printf("VP verify result: %v", VpReply.GetResult())
+	log.Printf("\n[VP Verify PublicKey PEM]\n%v", dkms.PbKeyPEM())
 }
 
 func main() {

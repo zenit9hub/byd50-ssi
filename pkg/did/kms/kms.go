@@ -283,7 +283,7 @@ func ExportPublicKeyAsPEM(publicKey interface{}) string {
 		} else {
 			publicKeyPEM = pem.EncodeToMemory(
 				&pem.Block{
-					Type:  "ECDSA PUBLIC KEY",
+					Type:  "PUBLIC KEY",
 					Bytes: publicKeyBytes,
 				},
 			)
