@@ -311,12 +311,20 @@ func verifyVP(this js.Value, args []js.Value) interface{} {
 		if err != nil {
 			result["error"] = err.Error()
 		}
-		return js.ValueOf(result) // Fast fail? Or continue? Let's return.
+        // Do not return here - Continue for diagnostics
 	}
 
 	// 2. Parse Claims for further checks
-	_, mapClaims, err := core.GetMapClaims(vpJwt, getPbKey)
-	if err != nil {
+    // If signature failed, GetMapClaims might fail too if it verifies.
+    // Let's use robust parsing for diagnostic purposes.
+    parser := new(jwt.Parser)
+    token, _, _ := parser.ParseUnverified(vpJwt, jwt.MapClaims{})
+    
+    var mapClaims jwt.MapClaims
+    if claims, ok := token.Claims.(jwt.MapClaims); ok {
+        mapClaims = claims
+    } else {
+        // Only return if we absolutely cannot parse claims
 		result["error"] = "Failed to parse claims"
 		return js.ValueOf(result)
 	}
