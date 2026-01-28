@@ -181,3 +181,13 @@ dev-up:
 .PHONY: test-summary
 test-summary:
 	@./scripts/test-summary.sh
+
+.PHONY: build-web run-web
+
+build-web:
+	GOOS=js GOARCH=wasm go build -o web/main.wasm web/wasm/main.go
+
+run-web: build-web
+	@echo "Starting Web Server at http://localhost:8000"
+	@echo "Press Ctrl+C to stop"
+	cd web && python3 -m http.server 8000

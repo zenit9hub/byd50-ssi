@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSI WASM Demo - BYD50</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="wasm_exec.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <div class="logo">SSI WASM Demo</div>
+            <div class="status" id="wasm-status">Loading WASM...</div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <main>
+            <!-- LEFT PANE: WALLET & IDENTITY -->
+            <section class="pane left-pane">
+                <h2>User Wallet & Identity</h2>
+
+                <!-- KEY PAIR SECTION -->
+                <div class="card">
+                    <h3>1. Key Pair</h3>
+                    <button id="btn-gen-key" class="btn primary">Generate Key Pair</button>
+                    <div class="output-group">
+                        <label>Private Key (PEM)</label>
+                        <textarea id="out-priv-key" readonly></textarea>
+                        <label>Public Key (PEM)</label>
+                        <textarea id="out-pub-key" readonly></textarea>
+                    </div>
+                </div>
+
+                <!-- DID SECTION -->
+                <div class="card">
+                    <h3>2. DID Creation</h3>
+                    <button id="btn-create-did" class="btn secondary" disabled>Create DID</button>
+                    <div class="output-group">
+                        <label>User DID</label>
+                        <input type="text" id="out-did" readonly>
+                    </div>
+                </div>
+
+                <!-- VC SECTION -->
+                <div class="card">
+                    <h3>3. Driver's Licence (VC)</h3>
+                    <button id="btn-issue-vc" class="btn accent" disabled>Request DL VC</button>
+
+                    <div class="auth-status" id="auth-status-box" style="display:none;">
+                        <span>DID Auth Challenge:</span>
+                        <span id="auth-status-badge" class="auth-badge pending">Pending</span>
+                    </div>
+
+                    <div class="vc-display" id="vc-display">
+                        <div class="empty-state">No VC Issued</div>
+                    </div>
+                    <button id="btn-copy-vc" class="btn small" style="display:none;">Copy VC JWT</button>
+
+                    <div id="issuer-key-box"
+                        style="display:none; margin-top: 15px; border-top: 1px solid #30363d; padding-top: 10px;">
+                        <label style="display:block; margin-bottom: 5px;">Issuer Public Key (PEM)</label>
+                        <textarea id="out-issuer-pub-key" readonly style="font-size: 0.7em; height: 80px;"></textarea>
+                        <button id="btn-copy-issuer-key" class="btn small primary"
+                            style="width: 100%; margin-top: 5px;">Copy Issuer Public Key</button>
+                    </div>
+                </div>
+
+                <!-- VP SUBMISSION FORM -->
+                <div class="card highlight-card" id="vp-submission-card" style="opacity: 0.5; pointer-events: none;">
+                    <h3>4. VP Submission</h3>
+                    <div class="form-group">
+                        <label>Target Audience (Rent-a-Car DID)</label>
+                        <input type="text" id="input-aud" readonly placeholder="Waiting for request...">
+                    </div>
+                    <div class="form-group">
+                        <label>Nonce (Challenge)</label>
+                        <input type="text" id="input-nonce" readonly placeholder="Waiting for request...">
+                    </div>
+
+                    <div class="actions">
+                        <button id="btn-submit-vp" class="btn success" disabled>Submit VP for Contract</button>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="chk-tamper"> Tamper VP (Fail Scenario)
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT PANE: SCENARIO & VERIFIER -->
+            <section class="pane right-pane">
+                <h2>Rent-a-Car Scenario</h2>
+
+                <div class="scenario-controls">
+                    <p class="desc">Step 1: Request a contract to start the verification process.</p>
+                    <button id="btn-req-contract" class="btn big-btn">
+                        📝 Request Rental Contract
+                    </button>
+                </div>
+
+                <!-- CHECKLIST PANEL -->
+                <div class="checklist-panel" id="checklist-panel">
+                    <h3 class="panel-header">Verification Checklist</h3>
+                    <div class="checklist-items">
+                        <div class="check-item pending" id="chk-vp-sig">
+                            <div class="check-icon">!</div>
+                            <span>VP Signature Verified</span>
+                        </div>
+                        <div class="check-item pending" id="chk-vc-sig">
+                            <div class="check-icon">!</div>
+                            <span>VC Signature Verified (Issuer)</span>
+                        </div>
+                        <div class="check-item pending" id="chk-aud">
+                            <div class="check-icon">!</div>
+                            <span>Audience Match (Rent-a-Car)</span>
+                        </div>
+                        <div class="check-item pending" id="chk-nonce">
+                            <div class="check-icon">!</div>
+                            <span>Nonce Match</span>
+                        </div>
+                        <div class="check-item pending" id="chk-sub">
+                            <div class="check-icon">!</div>
+                            <span>Subject Match (Re-ID Check)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTRACT CARD -->
+                <div class="contract-card" id="contract-card">
+                    <h1>🎓 RENTAL CONTRACT ISSUED</h1>
+                    <p>Verification Successful</p>
+                    <div id="contract-details" style="font-size: 0.8rem; margin-top: 10px;"></div>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <h3>Other Scenarios</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="btn-scenario-key-rotation" class="btn warning" style="flex:1">Key Rotation
+                            Fail</button>
+                        <button id="btn-scenario-sub-mismatch" class="btn danger" style="flex:1">Subject Mismatch
+                            Fail</button>
+                    </div>
+                </div>
+
+                <!-- LOG PANEL -->
+                <div class="log-panel" style="margin-top: 2rem;">
+                    <h3 class="panel-header">System Logs</h3>
+                    <div id="log-output" class="log-output">
+                        <div class="log-entry system">Ready. Waiting for user action...</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
